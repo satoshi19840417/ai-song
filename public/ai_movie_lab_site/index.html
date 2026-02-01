@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="AI Movie Lab - AIで描く映画と日常の一瞬。ASMR動画、架空映画予告風MV、オリジナル曲MVを制作するクリエイティブスタジオ。">
+    <title>AI Movie Lab - AIで描く映画と日常の一瞬</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Noto+Sans+JP:wght@300;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050505;
+            --text: #e0e0e0;
+            --accent: #555;
+            --youtube: #FF0000;
+            --instagram: #E4405F;
+            --tiktok: #00f2ea;
+            --sora: #10a37f;
+            --suno: #fa5c5c;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        * {
+            cursor: none !important;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #fff;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.05;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI24pIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=');
+        }
+
+        .cursor-dot,
+        .cursor-circle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 10000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: exclusion;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+        }
+
+        .cursor-circle {
+            width: 40px;
+            height: 40px;
+            border: 1px solid white;
+            transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+
+        body.hovering .cursor-circle {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 4vw;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-big {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 8vw;
+            text-transform: uppercase;
+            line-height: 0.9;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+            margin: 0;
+            transition: 0.5s;
+        }
+
+        .hero:hover .hero-big {
+            color: #fff;
+        }
+
+        .hero-desc {
+            margin-top: 2rem;
+            max-width: 500px;
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .sec {
+            padding: 10rem 0;
+        }
+
+        .sec-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 4rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .platform-list {
+            border-top: 1px solid #333;
+        }
+
+        .platform-item {
+            border-bottom: 1px solid #333;
+            padding: 3rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-item:hover {
+            padding-left: 2rem;
+            background: #111;
+        }
+
+        .platform-num {
+            font-family: 'Syncopate';
+            color: #555;
+            margin-right: 2rem;
+            font-size: 1rem;
+        }
+
+        .platform-name {
+            font-size: 2.2rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .platform-name i {
+            font-size: 1.8rem;
+        }
+
+        .platform-arrow {
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: 0.4s;
+            transform: translateX(-20px);
+        }
+
+        .platform-item:hover .platform-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .platform-item.youtube:hover {
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .platform-item.youtube:hover .platform-name i {
+            color: var(--youtube);
+        }
+
+        .platform-item.sora:hover {
+            background: rgba(16, 163, 127, 0.1);
+        }
+
+        .platform-item.sora:hover .platform-name i {
+            color: var(--sora);
+        }
+
+        .platform-item.instagram:hover {
+            background: rgba(228, 64, 95, 0.1);
+        }
+
+        .platform-item.instagram:hover .platform-name i {
+            color: var(--instagram);
+        }
+
+        .platform-item.tiktok:hover {
+            background: rgba(0, 242, 234, 0.1);
+        }
+
+        .platform-item.tiktok:hover .platform-name i {
+            color: var(--tiktok);
+        }
+
+        .platform-item.suno:hover {
+            background: rgba(250, 92, 92, 0.1);
+        }
+
+        .platform-item.suno:hover .platform-name i {
+            color: var(--suno);
+        }
+
+        .platform-desc {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .works-category {
+            margin-bottom: 8rem;
+        }
+
+        .works-category-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 0.8rem;
+            display: inline-block;
+        }
+
+        .works-category-desc {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10vw;
+            margin-top: 2rem;
+        }
+
+        .gal-item {
+            margin-bottom: 10rem;
+            display: none;
+        }
+
+        .gal-item.loaded {
+            display: block;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .gal-item:nth-child(even) {
+            margin-top: 15rem;
+        }
+
+        .img-mask {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .g-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: grayscale(100%);
+            transition: 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(1.1);
+        }
+
+        .img-mask:hover .g-img {
+            filter: grayscale(0%);
+            transform: scale(1);
+        }
+
+        .g-title {
+            font-family: 'Syncopate';
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        .g-sub {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .silhouette-container {
+            position: fixed;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .silhouette-container.visible {
+            opacity: 0.4;
+        }
+
+        .silhouette-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: brightness(1.5) contrast(1.2);
+        }
+
+        .silhouette-left {
+            left: -180px;
+            top: 35%;
+            transform: translateY(-50%);
+            width: 550px;
+            height: 550px;
+        }
+
+        .silhouette-right {
+            right: -120px;
+            top: 60%;
+            transform: translateY(-50%);
+            width: 650px;
+            height: 650px;
+        }
+
+        .silhouette-top {
+            left: 35%;
+            top: -120px;
+            transform: translateX(-50%);
+            width: 480px;
+            height: 480px;
+        }
+
+        .silhouette-bottom {
+            left: 65%;
+            bottom: -180px;
+            transform: translateX(-50%);
+            width: 520px;
+            height: 520px;
+        }
+
+        /* Scroll Reveal Animation */
+        .scroll-reveal {
+            opacity: 0;
+            transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Default: Slide from Left */
+        .scroll-reveal {
+            transform: translateX(-50px);
+        }
+
+        /* Alt (Right aligned): Slide from Right */
+        .works-category.alt.scroll-reveal,
+        .works-category.alt .scroll-reveal {
+            transform: translateX(50px) !important;
+        }
+
+        /* Visible State - Reset Transform */
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateX(0) !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .about-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            border-top: 1px solid #333;
+            padding-top: 2rem;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 2;
+            margin-top: 0;
+        }
+
+        .co-dl {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            row-gap: 2rem;
+            margin: 0;
+        }
+
+        .co-dt {
+            font-family: 'Syncopate';
+            font-weight: 700;
+            color: #555;
+        }
+
+        .co-dd {
+            margin: 0;
+            font-weight: 300;
+            line-height: 1.8;
+        }
+
+        .sns-links {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .sns-link {
+            font-size: 2.5rem;
+            color: #555;
+            transition: 0.3s;
+        }
+
+        .sns-link:hover {
+            transform: scale(1.2);
+        }
+
+        .sns-link.youtube:hover {
+            color: var(--youtube);
+        }
+
+        .sns-link.sora:hover {
+            color: var(--sora);
+        }
+
+        .sns-link.instagram:hover {
+            color: var(--instagram);
+        }
+
+        .sns-link.tiktok:hover {
+            color: var(--tiktok);
+        }
+
+        .sns-link.suno:hover {
+            color: var(--suno);
+        }
+
+        footer {
+            padding: 5rem 0;
+            text-align: center;
+            border-top: 1px solid #333;
+            margin-top: 5rem;
+        }
+
+        .f-contact {
+            font-size: 4vw;
+            font-weight: 700;
+            text-decoration: none;
+            color: #fff;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .f-contact:hover {
+            letter-spacing: 0.1em;
+            color: #888;
+        }
+
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 5000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s;
+            padding: 4vw;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lb-content {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            gap: 4rem;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.95);
+            transition: 0.4s;
+        }
+
+        .lightbox.active .lb-content {
+            transform: scale(1);
+        }
+
+        .lb-img-wrap {
+            flex: 3;
+            max-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lb-img {
+            max-width: 100%;
+            max-height: 80vh;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            display: block;
+            width: auto;
+            height: auto;
+        }
+
+        .lb-info {
+            flex: 2;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: 0.5s 0.2s;
+        }
+
+        .lightbox.active .lb-info {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .lightbox.has-text .lb-info {
+            display: flex;
+        }
+
+        .lightbox.has-text .lb-content {
+            max-width: 1200px;
+        }
+
+        .lightbox:not(.has-text) .lb-img-wrap {
+            flex: auto;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .lightbox:not(.has-text) .lb-content {
+            max-width: auto;
+            justify-content: center;
+        }
+
+        .lb-title {
+            font-family: 'Syncopate';
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            line-height: 1.1;
+        }
+
+        .lb-desc {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #aaa;
+            border-left: 1px solid #333;
+            padding-left: 1.5rem;
+        }
+
+        .lb-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 1.5rem;
+            color: #fff;
+            font-family: 'Syncopate';
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .works-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .works-links.grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .work-card {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            transition: 0.3s;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .work-card:hover {
+            background: #151515;
+            border-color: #555;
+            transform: translateX(10px);
+        }
+
+        .work-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+            margin-right: 1.5rem;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .work-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .work-name {
+            font-family: 'Syncopate';
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .work-detail {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 0.2rem;
+        }
+
+        .work-arrow {
+            font-family: 'Syncopate';
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: 0.3s;
+            transform: translateX(-10px);
+        }
+
+        .work-card:hover .work-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Brand Colors for Works */
+        .work-card.suno:hover .work-icon {
+            color: var(--suno);
+        }
+
+        .work-card.youtube:hover .work-icon {
+            color: var(--youtube);
+        }
+
+        .work-card.instagram:hover .work-icon {
+            color: var(--instagram);
+        }
+
+        .work-card.tiktok:hover .work-icon {
+            color: var(--tiktok);
+        }
+
+        .work-card.sora:hover .work-icon {
+            color: var(--sora);
+        }
+
+        .work-card.web:hover .work-icon {
+            color: #4a90e2;
+        }
+
+        /* Alternating Layout Styles */
+        .works-category.alt {
+            text-align: right;
+        }
+
+        .works-category.alt .works-category-desc {
+            margin-left: auto;
+        }
+
+        .works-category.alt .works-links,
+        .works-category.alt .works-links.grid-2 {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        /* 
+           Special handling for grid-2 in alt mode if we want them side-by-side but right aligned.
+           However, the original grid-2 uses CSS Grid. 
+           To support right alignment easily with alternating flow, 
+           let's keep the grid but align items inside if possible, 
+           or just rely on the text alignment.
+           BUT: The user likely wants the *layout* to look mirrored.
+           So for the grid part, we should ensure the whole block aligns right.
+        */
+        .works-category.alt .works-links.grid-2 {
+            display: grid;
+            /* No special flex override for grid, just ensure grid items align content if needed */
+            direction: rtl;
+            /* Simple trick to flip grid order visually if desired? No, let's keep it simple first. */
+            /* Actually, just aligning the text inside the grid container is enough for now, 
+               but the cards themselves need to be flipped. */
+            justify-content: end;
+            /* For grid */
+        }
+
+        /* Flip the card content for alt categories */
+        .works-category.alt .work-card {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .works-category.alt .work-icon {
+            margin-right: 0;
+            margin-left: 1.5rem;
+        }
+
+        .works-category.alt .work-arrow {
+            transform: translateX(10px);
+            /* Initial state for right side arrow? */
+            /* Actually arrow is usually at the end. 
+               In normal card: [Icon] [Text] [Arrow]
+               Reversed: [Arrow] [Text] [Icon] <-- This might be weird.
+               Let's think: 
+               Normal: Icon(Left) -> Text(Center-ish) -> Arrow(Right, hidden)
+               
+               If we flex-reverse:
+               Arrow -> Text -> Icon
+               
+               This puts the Arrow on the far left. 
+               User visualizes "Right Aligned" usually as:
+               [Arrow] [Text] [Icon] | (Edge of screen)
+               
+               Let's adjust the arrow animation for the left side.
+            */
+            order: 3;
+            /* Force Arrow to be 'visually' on the left if reversed? No. */
+        }
+
+        /* Re-thinking the card structure for Alt.
+           Normal: [Icon] [Info] [Arrow]
+           Alt: [Arrow] [Info] [Icon]
+           
+           If we use flex-direction: row-reverse:
+           It becomes: [Arrow] [Info] [Icon]
+           
+           We need to adjust the arrow animation to slide from left.
+        */
+        .works-category.alt .work-arrow {
+            transform: translateX(10px);
+        }
+
+        .works-category.alt .work-card:hover .work-arrow {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .hero-big {
+                font-size: 12vw;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .gal-item:nth-child(even) {
+                margin-top: 0;
+            }
+
+            .about-area {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .co-dl {
+                display: block;
+            }
+
+            .co-dt {
+                margin-bottom: 0.5rem;
+                margin-top: 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .co-dd {
+                margin-left: 0;
+                margin-bottom: 1rem;
+            }
+
+            .platform-name {
+                font-size: 1.5rem;
+            }
+
+            .platform-name i {
+                font-size: 1.3rem;
+            }
+
+            .sns-links {
+                gap: 2rem;
+            }
+
+            .sns-link {
+                font-size: 2rem;
+            }
+
+            .lb-content {
+                flex-direction: column;
+                gap: 2rem;
+                overflow-y: auto;
+                max-height: 90vh;
+            }
+
+            .lb-img-wrap {
+                width: 100%;
+                flex: none;
+            }
+
+            .lb-img {
+                max-height: 50vh;
+                width: 100%;
+                object-fit: contain;
+            }
+
+            .lb-info {
+                width: 100%;
+                padding-bottom: 2rem;
+            }
+
+            .lb-title {
+                font-size: 1.8rem;
+            }
+
+            .cursor-dot,
+            .cursor-circle {
+                display: none;
+            }
+
+            * {
+                cursor: auto !important;
+            }
+
+            /* Platform セクション */
+            .platform-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 2rem 0;
+            }
+
+            .platform-arrow {
+                opacity: 1;
+                transform: none;
+                font-size: 0.9rem;
+            }
+
+            .platform-num {
+                margin-right: 1rem;
+            }
+
+            .platform-desc {
+                font-size: 0.75rem;
+            }
+
+            /* Works セクション */
+            .works-links.grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .works-category.alt {
+                text-align: left;
+            }
+
+            .works-category.alt .works-category-desc {
+                margin-left: 0;
+            }
+
+            .works-category.alt .work-card {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .works-category.alt .work-icon {
+                margin-left: 0;
+                margin-right: 1.5rem;
+            }
+
+            .works-category.alt .works-links,
+            .works-category.alt .works-links.grid-2 {
+                align-items: stretch;
+            }
+
+            .work-arrow {
+                opacity: 1;
+                transform: none;
+            }
+
+            .work-card {
+                padding: 1.2rem 1rem;
+            }
+
+            .work-name {
+                font-size: 1rem;
+            }
+
+            /* セクションタイトル */
+            .sec-title {
+                font-size: 2rem;
+            }
+
+            .works-category-title {
+                font-size: 1.3rem;
+            }
+
+            .works-category {
+                margin-bottom: 4rem;
+            }
+
+            /* シルエット（モバイルでは非表示） */
+            .silhouette-container {
+                display: none;
+            }
+
+            /* セクションパディング調整 */
+            .sec {
+                padding: 5rem 0;
+            }
+
+            /* Hero調整 */
+            .hero-desc {
+                margin-left: 0;
+                font-size: 0.85rem;
+            }
+
+            /* フッター */
+            .f-contact {
+                font-size: 1.5rem;
+                padding: 0 1rem;
+                word-break: break-word;
+            }
+
+            .sns-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* 16:9 */
+            height: 0;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 3rem auto;
+            border: 1px solid #333;
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Quick Navigation */
+        .hero-quick-nav {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .hero-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border: 1px solid #333;
+            background: rgba(10, 10, 10, 0.8);
+            transition: 0.3s;
+            text-decoration: none;
+            color: #888;
+            min-width: 140px;
+        }
+
+        .hero-nav-item:hover {
+            background: #151515;
+            border-color: #fff;
+            color: #fff;
+            transform: translateY(-5px);
+        }
+
+        .hero-nav-item i {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .hero-nav-item.youtube:hover i {
+            color: var(--youtube);
+        }
+
+        .hero-nav-item.works:hover i {
+            color: #4a90e2;
+        }
+
+        .hero-nav-item.contact:hover i {
+            color: #10b981;
+        }
+
+        .nav-label {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-sub {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.7rem;
+            color: #555;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            text-align: center;
+        }
+
+        .contact-intro {
+            color: #888;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #fff;
+            background: #111;
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .hero-quick-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero-nav-item {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 1rem;
+                min-width: auto;
+                padding: 1rem 1.5rem;
+            }
+
+            .hero-nav-item i {
+                margin-bottom: 0;
+                font-size: 1.5rem;
+            }
+
+            .nav-sub {
+                display: none;
+            }
+        }
+
+        /* Creator Profile */
+        .creator-profile {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid #333;
+        }
+
+        .creator-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #333;
+            filter: grayscale(30%);
+            transition: 0.4s;
+            background-color: #fff;
+            /* Added white background */
+        }
+
+        .creator-avatar:hover {
+            filter: grayscale(0%);
+            border-color: #fff;
+        }
+
+        .creator-info {
+            flex: 1;
+        }
+
+        .creator-name {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .creator-role {
+            font-size: 0.85rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .creator-bio {
+            font-size: 0.9rem;
+            color: #888;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            .creator-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .creator-avatar {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 1.2rem;
+            text-decoration: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            color: #fff;
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="noise"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <div id="lightbox" class="lightbox">
+        <div class="lb-close hover-target">CLOSE</div>
+        <div class="lb-content">
+            <div class="lb-img-wrap">
+                <img id="lb-img" class="lb-img" src="" alt="">
+            </div>
+            <div class="lb-info">
+                <h3 id="lb-title" class="lb-title"></h3>
+                <p id="lb-desc" class="lb-desc"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="hero">
+            <h1 class="hero-big hover-target">AI<br>MOVIE<br>LAB</h1>
+            <div class="hero-quick-nav">
+                <a href="#on-air" class="hero-nav-item youtube hover-target">
+                    <i class="fab fa-youtube"></i>
+                    <span class="nav-label">最新作を見る</span>
+                    <span class="nav-sub">YouTube</span>
+                </a>
+                <a href="#works-section" class="hero-nav-item works hover-target">
+                    <i class="fas fa-film"></i>
+                    <span class="nav-label">代表作を見る</span>
+                    <span class="nav-sub">Works</span>
+                </a>
+                <a href="#contact-section" class="hero-nav-item contact hover-target">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-label">相談する</span>
+                    <span class="nav-sub">Contact</span>
+                </a>
+            </div>
+            <p class="hero-desc">
+                AIで描く映画と日常の一瞬。<br>
+                可愛い動物たちのASMR動画、架空映画予告風MV、<br>
+                オリジナル曲MVを制作するクリエイティブスタジオです。<br>
+                質感と空気感にこだわった映像を毎日お届けします。
+            </p>
+        </header>
+
+        <section class="sec" id="on-air" style="text-align: center;">
+            <h2 class="sec-title">ON AIR</h2>
+            <div id="latest-video-container">
+                <p style="color: #666; margin-top: 2rem;">Loading latest video...</p>
+            </div>
+            <a href="https://www.youtube.com/@AImovieLab2025" target="_blank" class="platform-arrow hover-target"
+                style="opacity: 1; transform: none; display: inline-block; margin-top: 2rem;">
+                VIEW MORE ON YOUTUBE →
+            </a>
+        </section>
+
+        <section class="sec">
+            <h2 class="sec-title">Platforms</h2>
+            <div class="platform-list">
+                <a href="https://www.youtube.com/@AImovieLab2025" target="_blank"
+                    class="platform-item youtube hover-target">
+                    <div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="platform-num">/01</span>
+                            <span class="platform-name"><i class="fab fa-youtube"></i> YouTube</span>
+                        </div>
+                        <p class="platform-desc">@AImovieLab2025 • 123 subscribers • 270+ videos</p>
+                    </div>
+                    <span class="platform-arrow">VISIT →</span>
+                </a>
+
+                <a href="https://sora.chatgpt.com/profile/satoshisenga" target="_blank"
+                    class="platform-item sora hover-target">
+                    <div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="platform-num">/02</span>
+                            <span class="platform-name"><i class="fas fa-video"></i> Sora</span>
+                        </div>
+                        <p class="platform-desc">OpenAI Sora • AI映像制作プラットフォーム</p>
+                    </div>
+                    <span class="platform-arrow">VISIT →</span>
+                </a>
+
+                <a href="https://www.instagram.com/ai_musicandcinema/" target="_blank"
+                    class="platform-item instagram hover-target">
+                    <div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="platform-num">/03</span>
+                            <span class="platform-name"><i class="fab fa-instagram"></i> Instagram</span>
+                        </div>
+                        <p class="platform-desc">@ai_musicandcinema • AI音楽と映像の世界</p>
+                    </div>
+                    <span class="platform-arrow">VISIT →</span>
+                </a>
+
+                <a href="https://www.tiktok.com/@aicinemamusic" target="_blank"
+                    class="platform-item tiktok hover-target">
+                    <div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="platform-num">/04</span>
+                            <span class="platform-name"><i class="fab fa-tiktok"></i> TikTok</span>
+                        </div>
+                        <p class="platform-desc">@aicinemamusic • 可愛動物たちのASMRの世界</p>
+                    </div>
+                    <span class="platform-arrow">VISIT →</span>
+                </a>
+
+                <a href="https://suno.com/@hypnotizingtonalities0343" target="_blank"
+                    class="platform-item suno hover-target">
+                    <div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="platform-num">/05</span>
+                            <span class="platform-name"><i class="fas fa-music"></i> Suno</span>
+                        </div>
+                        <p class="platform-desc">@hypnotizingtonalities0343 • AI Music Generation</p>
+                    </div>
+                    <span class="platform-arrow">VISIT →</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="sec" id="works-section">
+            <h2 class="sec-title">Works</h2>
+
+            <!-- Silhouettes for scroll animation -->
+            <div class="silhouette-container silhouette-left" id="silhouette-1">
+                <img src="image/cat_silhouette.png" alt="cat silhouette">
+            </div>
+            <div class="silhouette-container silhouette-right" id="silhouette-2">
+                <img src="image/dog_silhouette.png" alt="dog silhouette">
+            </div>
+            <div class="silhouette-container silhouette-top" id="silhouette-3">
+                <img src="image/cat_silhouette_2.png" alt="cat silhouette 2">
+            </div>
+            <div class="silhouette-container silhouette-bottom" id="silhouette-4">
+                <img src="image/dog_silhouette_2.png" alt="dog silhouette 2">
+            </div>
+
+            <div class="works-category scroll-reveal">
+                <h3 class="works-category-title">音楽制作</h3>
+                <p class="works-category-desc">AI技術を活用したオリジナル楽曲制作。Suno AIを駆使して、ジャンルを超えた新しいサウンドを生み出しています。</p>
+                <div class="works-links">
+                    <a href="https://suno.com/@hypnotizingtonalities0343" target="_blank"
+                        class="work-card suno hover-target scroll-reveal">
+                        <i class="fas fa-music work-icon"></i>
+                        <div class="work-info">
+                            <span class="work-name">Suno</span>
+                            <span class="work-detail">@hypnotizingtonalities0343</span>
+                        </div>
+                        <span class="work-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="works-category scroll-reveal alt">
+                <h3 class="works-category-title">映像制作</h3>
+                <p class="works-category-desc">ASMR、MV、ショート動画。各プラットフォームの特性に合わせた映像表現を追求しています。</p>
+                <div class="works-links grid-2">
+                    <a href="https://www.youtube.com/@AImovieLab2025" target="_blank"
+                        class="work-card youtube hover-target scroll-reveal">
+                        <i class="fab fa-youtube work-icon"></i>
+                        <span class="work-name">YouTube</span>
+                    </a>
+                    <a href="https://www.instagram.com/ai_musicandcinema/" target="_blank"
+                        class="work-card instagram hover-target scroll-reveal">
+                        <i class="fab fa-instagram work-icon"></i>
+                        <span class="work-name">Instagram</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@aicinemamusic" target="_blank"
+                        class="work-card tiktok hover-target scroll-reveal">
+                        <i class="fab fa-tiktok work-icon"></i>
+                        <span class="work-name">TikTok</span>
+                    </a>
+                    <a href="https://sora.chatgpt.com/profile/satoshisenga" target="_blank"
+                        class="work-card sora hover-target scroll-reveal">
+                        <i class="fas fa-video work-icon"></i>
+                        <span class="work-name">Sora</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="works-category scroll-reveal">
+                <h3 class="works-category-title">サイト構築</h3>
+                <p class="works-category-desc">モダンなウェブサイト制作。ユーザービリティとデザイン性を兼ね備えたサイトを提供します。</p>
+                <div class="works-links">
+                    <a href="https://ai-movie-lab.netlify.app/" target="_blank"
+                        class="work-card web hover-target scroll-reveal">
+                        <i class="fas fa-laptop-code work-icon"></i>
+                        <div class="work-info">
+                            <span class="work-name">AI Movie Lab</span>
+                            <span class="work-detail">ai-movie-lab.netlify.app</span>
+                        </div>
+                        <span class="work-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec" style="padding-top: 0;">
+            <h2 class="sec-title">About</h2>
+            <div class="about-area">
+                <div>
+                    <p class="about-text">
+                        AI Movie Labは、最新のAI技術を活用して<br>
+                        映像と音楽を融合させたコンテンツを制作する<br>
+                        クリエイティブスタジオです。<br>
+                        <br>
+                        可愛い動物たちのASMR動画から、<br>
+                        架空映画の予告風MV、オリジナル楽曲まで、<br>
+                        質感と空気感にこだわった作品を<br>
+                        毎日お届けしています。
+                    </p>
+                </div>
+                <dl class="co-dl">
+                    <dt class="co-dt">NAME</dt>
+                    <dd class="co-dd">AI Movie Lab<br>AIムービーラボ</dd>
+
+                    <dt class="co-dt">CONTENT</dt>
+                    <dd class="co-dd">ASMR動画 / MV制作 / AI映像<br>オリジナル楽曲 / ショート動画</dd>
+
+                    <dt class="co-dt">UPDATE</dt>
+                    <dd class="co-dd">ショート動画：毎日3本<br>MV週2本</dd>
+
+                    <dt class="co-dt">TOOLS</dt>
+                    <dd class="co-dd">OpenAI Sora / AI Music Generator</dd>
+                </dl>
+            </div>
+
+            <div class="creator-profile">
+                <img src="Gemini_Generated_Image_pxk9n0pxk9n0pxk9.png" alt="Satoshi Senga"
+                    class="creator-avatar hover-target">
+                <div class="creator-info">
+                    <h3 class="creator-name">Satoshi Senga</h3>
+                    <p class="creator-role">Creator / Director</p>
+                    <p class="creator-bio">
+                        AI Movie Labの創設者。<br>AIと人間の創造性の融合を探求し、<br>
+                        新しい映像表現の可能性を追求しています。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec contact-section" id="contact-section">
+            <h2 class="sec-title">Contact</h2>
+            <p class="contact-intro">
+                制作依頼・コラボのご相談など、<br>
+                お気軽にお問い合わせください。
+            </p>
+            <form class="contact-form" action="https://formspree.io/f/xpqzvoyr" method="POST">
+                <div class="form-group">
+                    <label class="form-label" for="name">NAME</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="お名前" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">EMAIL</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="メールアドレス" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="subject">SUBJECT</label>
+                    <input type="text" id="subject" name="subject" class="form-input" placeholder="件名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="message">MESSAGE</label>
+                    <textarea id="message" name="message" class="form-textarea" placeholder="お問い合わせ内容"
+                        required></textarea>
+                </div>
+                <input type="hidden" name="_subject" value="AI Movie Lab お問い合わせ">
+                <button type="submit" class="submit-btn hover-target">SEND MESSAGE</button>
+            </form>
+        </section>
+
+        <footer>
+            <div class="sns-links">
+                <a href="https://www.youtube.com/@AImovieLab2025" target="_blank"
+                    class="sns-link youtube hover-target"><i class="fab fa-youtube"></i></a>
+                <a href="https://suno.com/@hypnotizingtonalities0343" target="_blank"
+                    class="sns-link suno hover-target"><i class="fas fa-music"></i></a>
+                <a href="https://www.instagram.com/ai_musicandcinema/" target="_blank"
+                    class="sns-link instagram hover-target"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@aicinemamusic" target="_blank" class="sns-link tiktok hover-target"><i
+                        class="fab fa-tiktok"></i></a>
+            </div>
+            <a href="https://www.youtube.com/@AImovieLab2025" target="_blank" class="f-contact hover-target"
+                style="margin-top: 3rem;">SUBSCRIBE NOW</a>
+            <div style="margin-top: 3rem; color: #555;">
+                &copy; <span id="year"></span> AI Movie Lab. All Rights Reserved.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top hover-target" id="back-to-top" title="上部に戻る">
+        <i class="fas fa-chevron-up"></i>
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // JS Gallery population removed in favor of direct links
+
+
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lb-img');
+            const lbTitle = document.getElementById('lb-title');
+            const lbDesc = document.getElementById('lb-desc');
+
+            window.openLightbox = (src, title = null, desc = null) => {
+                lbImg.src = src;
+                if (title && desc) {
+                    lb.classList.add('has-text');
+                    lbTitle.textContent = title;
+                    lbDesc.textContent = desc;
+                } else {
+                    lb.classList.remove('has-text');
+                    lbTitle.textContent = "";
+                    lbDesc.textContent = "";
+                }
+                lb.classList.add('active');
+            };
+
+            lb.addEventListener('click', (e) => {
+                lb.classList.remove('active');
+                setTimeout(() => {
+                    lbImg.src = '';
+                    lb.classList.remove('has-text');
+                }, 400);
+            });
+
+            document.querySelector('.lb-close').addEventListener('click', () => {
+                lb.classList.remove('active');
+            });
+
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorCircle = document.querySelector('.cursor-circle');
+            let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursorDot.style.left = mouseX + 'px';
+                cursorDot.style.top = mouseY + 'px';
+            });
+
+            function animateCursor() {
+                const dx = mouseX - cursorX;
+                const dy = mouseY - cursorY;
+                cursorX += dx * 0.15;
+                cursorY += dy * 0.15;
+                cursorCircle.style.left = cursorX + 'px';
+                cursorCircle.style.top = cursorY + 'px';
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+
+            document.body.addEventListener('mouseover', (e) => {
+                if (e.target.closest('.hover-target') || e.target.tagName === 'A') {
+                    document.body.classList.add('hovering');
+                } else {
+                    document.body.classList.remove('hovering');
+                }
+            });
+
+            // Scroll animation for silhouettes
+            const worksSection = document.getElementById('works-section');
+            const silhouettes = document.querySelectorAll('.silhouette-container');
+
+            function handleScroll() {
+                if (!worksSection) return;
+
+                const rect = worksSection.getBoundingClientRect();
+                const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+
+                silhouettes.forEach((silhouette, index) => {
+                    if (isInView) {
+                        silhouette.classList.add('visible');
+                    } else {
+                        silhouette.classList.remove('visible');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            handleScroll();
+
+            // Scroll Reveal Observer
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        // Add slight delay for staggered effect based on index or just simple fade
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const scrollElements = document.querySelectorAll('.scroll-reveal');
+            scrollElements.forEach(el => observer.observe(el));
+
+            // Fetch Latest YouTube Video
+            const CHANNEL_ID = 'UCW96_b-PA11fp-wYC4laNtg';
+            const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+            const API_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`;
+
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('latest-video-container');
+
+                    // Fallback ID as a known safe long-form video (Akaneが歌う「仮面舞踏会」)
+                    const FALLBACK_ID = 'vzERE2bGPmQ';
+                    const FALLBACK_TITLE = 'Akaneが歌う「仮面舞踏会」: 偽りの笑顔を脱ぎ捨て、自分を取り戻すAIの世界';
+
+                    if (data.items && data.items.length > 0) {
+                        // More robust filtering for full videos (excluding Shorts)
+                        // We check multiple videos since Shorts are posted more frequently
+                        const fullVideo = data.items.find(item => {
+                            const title = item.title;
+                            const titleLower = title.toLowerCase();
+                            const description = (item.description || '').toLowerCase();
+
+                            // Strong indicators of Shorts - reject immediately
+                            if (titleLower.includes('#short') ||
+                                titleLower.includes('#shorts') ||
+                                titleLower.includes('｜short') ||
+                                titleLower.includes('| short') ||
+                                titleLower.match(/\d+秒/) ||  // 10秒, 15秒, 30秒, 60秒 etc.
+                                title.includes('🩳')) {
+                                return false;
+                            }
+
+                            // Check for "shorts" or "ショート" but exclude if it's part of a breed name
+                            // British Shorthair = ブリティッシュショートヘア
+                            const hasShortWord = titleLower.includes('shorts') || titleLower.includes('ショート');
+                            const isBreedName = titleLower.includes('ショートヘア') ||
+                                titleLower.includes('shorthair') ||
+                                titleLower.includes('ショートヘアー');
+
+                            if (hasShortWord && !isBreedName) {
+                                return false;
+                            }
+
+                            // Check for specific Short formats in Japanese titles like "【ショート】", "〈ショート〉"
+                            if (/[【〈\(].*ショート.*[】〉\)]/.test(title)) {
+                                return false;
+                            }
+
+                            // Check description for shorts indicators
+                            if (description.includes('#short') ||
+                                description.includes('#shorts') ||
+                                (description.includes('short') && !description.includes('shorthair'))) {
+                                return false;
+                            }
+
+                            // Additional heuristic: look for vertical video indicators
+                            if (titleLower.includes('vertical') || titleLower.includes('縦型')) {
+                                return false;
+                            }
+
+                            // Filter out ASMR animal videos (typically shorts)
+                            // Most animal ASMR content is short-form (10-60 seconds)
+                            // We want to keep full music videos and movies
+                            const hasASMR = titleLower.includes('asmr') ||
+                                titleLower.includes('イヤホン推奨') ||
+                                titleLower.includes('癒し');
+
+                            const hasAnimal = titleLower.includes('赤ちゃん') ||
+                                titleLower.includes('子犬') ||
+                                titleLower.includes('子猫') ||
+                                titleLower.includes('ショートヘア') ||  // Breed names usually indicate animal ASMR
+                                titleLower.includes('チワワ') ||
+                                titleLower.includes('プードル') ||
+                                titleLower.includes('猫') ||
+                                titleLower.includes('犬');
+
+                            // If it has ASMR + animal keywords, it's likely a short ASMR video
+                            if (hasASMR && hasAnimal) {
+                                return false;
+                            }
+
+                            return true;
+                        }); // Use the found video, or fallback to the specific known latest long video if filter excludes everything
+                        const targetVideo = fullVideo || { guid: `yt:video:${FALLBACK_ID}`, title: FALLBACK_TITLE };
+
+                        // RSS guid is usually "yt:video:[VIDEO_ID]"
+                        const videoId = targetVideo.guid.split(':')[2];
+                        const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+
+                        container.innerHTML = `
+                            <div class="video-wrapper">
+                                <iframe src="${embedUrl}" title="${targetVideo.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                            <p class="g-title" style="margin-top:1.5rem;">${targetVideo.title}</p>
+                        `;
+                    } else {
+                        // If no data, use fallback
+                        const embedUrl = `https://www.youtube.com/embed/${FALLBACK_ID}?rel=0`;
+                        container.innerHTML = `
+                            <div class="video-wrapper">
+                                <iframe src="${embedUrl}" title="${FALLBACK_TITLE}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                            <p class="g-title" style="margin-top:1.5rem;">${FALLBACK_TITLE}</p>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching video:', err);
+                    // Fallback on error too
+                    const FALLBACK_ID = 'fg6h07NYbC4';
+                    const FALLBACK_TITLE = '空白の雪 - AI Music Video 【冬の切ないバラード】';
+                    const embedUrl = `https://www.youtube.com/embed/${FALLBACK_ID}?rel=0`;
+
+                    document.getElementById('latest-video-container').innerHTML = `
+                        <div class="video-wrapper">
+                            <iframe src="${embedUrl}" title="${FALLBACK_TITLE}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <p class="g-title" style="margin-top:1.5rem;">${FALLBACK_TITLE}</p>
+                    `;
+                });
+        });
+    </script>
+    <script>
+        // Back to Top button visibility
+        const backToTop = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        // Smooth scroll to top
+        backToTop.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+
+</html>

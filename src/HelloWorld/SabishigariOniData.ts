@@ -1,0 +1,38 @@
+/* eslint-disable no-irregular-whitespace */
+import { staticFile } from "remotion";
+
+export const sabishigariOniData = {
+    title: "寂しがり屋な鬼の唄",
+    artist: "Suno AI",
+    videoSource: staticFile("suno_PJ/done/寂しがり屋な鬼の唄.mp4"),
+    lyrics: [
+        { timeTag: "[00:01.16]", text: "街中から聞こえる「鬼は外」の声" },
+        { timeTag: "[00:08.20]", text: "賑やかな笑い声　冬の空に溶けていく" },
+        { timeTag: "[00:14.77]", text: "この部屋には静寂だけが　冷たく響いて" },
+        { timeTag: "[00:21.57]", text: "二人で買った鬼のお面" },
+        { timeTag: "[00:24.75]", text: "去年の君の笑顔　ふと思い出す" },
+        { timeTag: "[00:29.62]", text: "ずっと一緒だってさ" },
+        { timeTag: "[00:34.39]", text: "当たり前の幸せ" },
+        { timeTag: "[00:37.49]", text: "なんの根拠もなく　信じてた" },
+        { timeTag: "[00:43.15]", text: "目の前の泣いてる君に気づかない" },
+        { timeTag: "[00:51.62]", text: "そんな鬼の僕" },
+        { timeTag: "[00:54.93]", text: "福が逃げた「鬼」だけの部屋" },
+        { timeTag: "[01:01.46]", text: "いつまでも帰りを待ってる" },
+        { timeTag: "[01:08.51]", text: "福に見捨てられた　寂しがり屋の鬼の唄" },
+        { timeTag: "[01:22.58]", text: "恵方巻の向く方角は　毎年変わるのに" },
+        { timeTag: "[01:28.57]", text: "僕はいつまでも　変われないまま" },
+        { timeTag: "[01:32.32]", text: "少しずつズレてた二人に　気づかないまま" },
+        { timeTag: "[01:38.74]", text: "置いて行かれたマグカップがこっちを見てる" },
+        { timeTag: "[01:46.47]", text: "豆を投げつけられて　痛いほうがマシだった" },
+        { timeTag: "[01:53.07]", text: "何も言わずに消えた　その静けさが痛い" },
+        { timeTag: "[01:57.83]", text: "悪いのは鬼だよ　僕が鬼だったんだ" },
+        { timeTag: "[02:02.19]", text: "君の笑顔を食いつぶした　わがままな鬼" },
+        { timeTag: "[02:12.71]", text: "「福」が幸せを持ってきたのに" },
+        { timeTag: "[02:19.49]", text: "追い出した「鬼」が　春をまだ探してる" },
+        { timeTag: "[02:26.15]", text: "バイバイ　愛しい福の神" },
+        { timeTag: "[02:39.45]", text: "鬼は内　福は外..." },
+        { timeTag: "[02:46.40]", text: "この部屋に　春は来ない　まだこない" },
+        { timeTag: "[02:53.30]", text: "来年の恵方は　君のいる街" },
+        { timeTag: "[03:00.22]", text: "これは寂しがり屋な鬼の唄" },
+    ],
+};
