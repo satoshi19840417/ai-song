@@ -71,6 +71,11 @@ import { curtainCallData } from "./HelloWorld/CurtainCallData";
 import { ValentineVideo, valentineSchema } from "./HelloWorld/ValentineVideo";
 import { valentineData } from "./HelloWorld/ValentineData";
 import {
+  ScarsIntoStarsVideo,
+  scarsIntoStarsSchema,
+} from "./HelloWorld/ScarsIntoStarsVideo";
+import { scarsIntoStarsData } from "./HelloWorld/ScarsIntoStarsData";
+import {
   SabishigariOniVideo,
   sabishigariOniSchema,
 } from "./HelloWorld/SabishigariOniVideo";
@@ -281,6 +286,23 @@ export const RemotionRoot: React.FC = () => {
             { timeTag: "[02:52.65]", text: "今日から始まる　新しいストーリー" },
             { timeTag: "[02:59.04]", text: "今さらのHappy Valentine..." },
           ],
+        }}
+      />
+      <Composition
+        id="ScarsIntoStars"
+        component={ScarsIntoStarsVideo}
+        durationInFrames={5460} // 2:49.97 + 12s buffer = 181.97s * 30fps
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={scarsIntoStarsSchema}
+        defaultProps={{
+          fontSize: 42,
+          bottomOffset: 120,
+          title: scarsIntoStarsData.title,
+          artist: scarsIntoStarsData.artist,
+          videoSource: scarsIntoStarsData.videoSource,
+          lyrics: scarsIntoStarsData.lyrics,
         }}
       />
       <Composition
