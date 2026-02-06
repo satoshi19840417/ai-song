@@ -15,10 +15,10 @@ build
 *.mp3
 *.wav
 
-# Ignore large media files in suno_PJ (redundant but keeping for clarity if needed, or removing if fully covered by global)
-# public/suno_PJ/**/*.mp4
-# public/suno_PJ/**/*.mp3
-# public/suno_PJ/**/*.wav
+# Ignore large media files in suno_PJ (explicit patterns for safety)
+public/suno_PJ/**/*.mp4
+public/suno_PJ/**/*.mp3
+public/suno_PJ/**/*.wav
 
 # Python
 __pycache__/

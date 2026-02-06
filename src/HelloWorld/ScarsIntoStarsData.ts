@@ -4,7 +4,7 @@ import { staticFile } from "remotion";
 export const scarsIntoStarsData = {
     title: "Scars into Stars",
     artist: "Suno AI",
-    videoSource: staticFile("suno_PJ/done/Scars into Stars.mp3"),
+    videoSource: staticFile("suno_PJ/done/ScarsIntoStars.mp4"),
     lyrics: [
         { timeTag: "[00:00.67]", text: "おとぎ話で見た ガラスの城" },
         { timeTag: "[00:04.85]", text: "ここは息が止まるほど冷たい" },
