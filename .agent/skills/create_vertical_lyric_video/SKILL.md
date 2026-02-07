@@ -5,83 +5,129 @@ description: Generate a Remotion lyric video with vertical writing (縦書き) d
 
 # Create Vertical Lyric Video Skill
 
-This skill creates lyric videos with **vertical writing** (縦書き), right-top aligned, featuring a fragile/transient aesthetic.
+縦書きリリックビデオを作成するスキル。明朝体フォント、オーバーレイなし、強調歌詞の中央表示が特徴。
 
 ## When to Use
 
-Use this skill when the user requests:
-- Vertical lyric display (縦書き)
-- Japanese-style lyric presentation
-- Fragile/transient (はかなさ) aesthetic
-- Melancholic or emotional song themes
+- 縦書き歌詞表示のリクエスト
+- 日本的・情緒的な雰囲気の曲
+- 「生きろ」スタイルの演出希望
 
 ## Workflow
 
-1.  **Scan for New Files**
-    *   Look in `public/suno_PJ/new` for pairs of `.lrc` and `.mp4` (or `.mp3`) files.
+### 1. Scan for New Files
+`public/suno_PJ/new` から `.lrc` と `.mp4` ペアを検出
 
-2.  **Generate Data File**
-    *   Create `src/HelloWorld/[SongName]Data.ts`
-    *   Use `staticFile("suno_PJ/done/[filename].mp4")` for videoSource
+### 2. Generate Data File
 
-3.  **Generate Video Component**
-    *   Use `SabishigariOniVideo.tsx` as the template for vertical lyric style.
-    *   **Key Style Elements**:
+`src/HelloWorld/[SongName]Data.ts` を作成：
 
-    ### StandardLyricLine
-    ```tsx
-    style={{
-        position: "absolute",
-        top: 80,
-        right: 80,
-        writingMode: "vertical-rl",
-        textOrientation: "mixed",
-        textAlign: "right",
-        fontFamily: "'Shippori Mincho', 'Yuji Syuku', serif",
-        fontWeight: 400,
-        color: "#ffffff",
-        textShadow: "0 0 8px rgba(255,255,255,0.3), 2px 2px 4px rgba(0,0,0,0.5)",
-        letterSpacing: "0.15em",
-        lineHeight: 1.8,
-        maxHeight: "70vh",
-    }}
-    ```
+```typescript
+import { staticFile } from "remotion";
 
-    ### Animation
-    - **Fade**: Slow fade in (30 frames), very slow fade out (60 frames)
-    - **Drift**: Subtle horizontal floating `Math.sin(frame * 0.02) * 3`
-    - **EmphasisLine**: Add glow pulse `10 + Math.sin(frame * 0.08) * 5`
+export const [camelCaseName]Data = {
+  title: "曲名",
+  artist: "アーティスト名",
+  videoSource: staticFile("suno_PJ/done/[filename].mp4"),
+  layoutMode: "vertical" as const,
+  // 位置調整（%単位）
+  rightOffset: 10,   // 右からの距離
+  topOffset: 8,      // 上からの距離
+  lyrics: [
+    { timeTag: "[00:00.00]", text: "歌詞テキスト" },
+    // ...
+  ],
+  emphasisLines: [
+    // 中央表示する重要歌詞
+    { timeTag: "[01:00.00]", text: "サビの歌詞" },
+  ],
+  sections: [
+    // オプション：セクション定義
+    { name: "Aメロ", startTimeTag: "[00:00.00]", overlayOpacity: 0, fontScale: 1.0 },
+  ],
+};
+```
 
-    ### FinalLyricLine
-    - Position: Center screen with vertical writing
-    - Very slow fade out (120 frames)
-    - Optional: Split text for staggered fade effect
+### 3. Generate Video Component
 
-    ### No Opening Title
-    - Skip the OpeningTitle Sequence for this style
+**テンプレート**: `IkiroVideo.tsx`
 
-4.  **Register Composition**
-    *   Edit `src/Root.tsx`
-    *   Add new Composition with 1920x1080, 30fps
-    *   Duration: Last timestamp + 12-15 seconds buffer
+#### スタイル設定
 
-5.  **Move Processed Files**
-    *   Move files from `new` to `done` folder
+| 要素 | 値 |
+|------|-----|
+| フォント | `Zen Old Mincho`, `Shippori Mincho`, `Noto Serif JP` |
+| ウェイト | 400-500（軽め） |
+| 字間 | `0.18em`〜`0.2em` |
+| オーバーレイ | **なし**（元動画の明るさ維持） |
 
-6.  **Start Development Server**
-    *   Run `npm run dev` to preview
+#### 歌詞位置
 
-## Style Guidelines
+```tsx
+// 通常歌詞：右上
+{
+  position: "absolute",
+  top: `${topOffset}%`,
+  right: `${rightOffset}%`,
+  writingMode: "vertical-rl",
+  textOrientation: "upright",
+}
 
-| Element | Value |
-|---------|-------|
-| Writing Mode | `vertical-rl` |
-| Position | Top-right (`top: 80, right: 80`) |
-| Font | Shippori Mincho, Yuji Syuku |
-| Color | White (#ffffff) |
-| Fade Out | 60-120 frames (slow/dramatic) |
-| Effect | Subtle drift + optional glow |
+// 強調歌詞：中央
+{
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+}
+```
+
+#### 強調歌詞フォントサイズ
+
+```tsx
+const lineFontSize = props.fontSize * sectionStyle.fontScale * (isEmphasis ? 2.5 : 1);
+```
+
+#### イントロカード（縦書き）
+
+```tsx
+<div style={{
+  position: "absolute",
+  top: "50%",
+  right: "12%",
+  writingMode: "vertical-rl",
+  textOrientation: "upright",
+  fontFamily: "'Zen Old Mincho', serif",
+  fontSize: 72,
+  fontWeight: 500,
+}}>
+  {title}
+</div>
+```
+
+### 4. Register Composition
+
+`src/Root.tsx` に追加：
+- Dimensions: 1920x1080, 30fps
+- Duration: 最終歌詞タイムスタンプ + 10-15秒
+
+### 5. Move Processed Files
+
+`public/suno_PJ/new` → `public/suno_PJ/done`
+
+### 6. Launch Preview
+
+`npm run dev` で Remotion Studio を起動
 
 ## Template Reference
 
-Use `SabishigariOniVideo.tsx` as the golden master for vertical lyric style.
+**Golden Master**: `IkiroVideo.tsx`
+
+## 調整可能な値
+
+| パラメータ | デフォルト | 説明 |
+|-----------|-----------|------|
+| `rightOffset` | 10 | 右からの距離（%） |
+| `topOffset` | 8 | 上からの距離（%） |
+| `fontSize` | 52 | 基本フォントサイズ |
+| 強調倍率 | 2.5 | 強調歌詞のサイズ倍率 |

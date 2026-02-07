@@ -1,0 +1,6 @@
+> my-remotion-01@1.0.0 dev
+> remotion studio
+
+Server ready - Local: http://localhost:3001, Network: http://192.168.0.26:3001
+Built in 3380ms
+

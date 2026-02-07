@@ -78,10 +78,10 @@ This skill automates the process of creating a new lyric video component in the 
     *   **CRITICAL**: Move source files from `public/suno_PJ/new` to `public/suno_PJ/done`.
     *   Create the `done` directory if it doesn't exist.
 
-8.  **Start Development Server**
-    *   Run `npm run dev` to start the Remotion Studio.
-    *   The server will be available at `http://localhost:3000`.
-    *   Notify the user that the new composition is ready for preview.
+8.  **Launch Preview Via Dedicated Skill**
+    *   Use `remotion-preview-launch` after generation.
+    *   Return the detected Remotion URL, PID, and stop command.
+    *   Do not assume `http://localhost:3000`; always report the detected URL.
 
 ## Animation Best Practices Reference
 

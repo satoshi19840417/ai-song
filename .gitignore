@@ -23,3 +23,6 @@ public/suno_PJ/**/*.wav
 # Python
 __pycache__/
 *.pyc
+
+# Local Netlify folder
+.netlify

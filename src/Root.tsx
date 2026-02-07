@@ -33,6 +33,8 @@ import {
 import { restartLineData } from "./HelloWorld/RestartLineData";
 import { SakebeVideo, sakebeSchema } from "./HelloWorld/SakebeVideo";
 import { sakebeData } from "./HelloWorld/SakebeData";
+import { IkiroVideo, ikiroSchema } from "./HelloWorld/IkiroVideo";
+import { ikiroData } from "./HelloWorld/IkiroData";
 import {
   SaitekikaiVideo,
   saitekikaiSchema,
@@ -998,6 +1000,193 @@ export const RemotionRoot: React.FC = () => {
             { timeTag: "[01:54.80]", text: "何度でも　叫べ！" },
             { timeTag: "[01:57.74]", text: "さぁ、行こうぜ！" },
           ],
+        }}
+      />
+      <Composition
+        id="Ikiro"
+        component={IkiroVideo}
+        durationInFrames={30 * 232} // 3:52 video length
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={ikiroSchema}
+        defaultProps={{
+          fontSize: 30,
+          bottomOffset: 50,
+          videoSource: staticFile("生きろ.mp4"),
+          title: "生きろ",
+          artist: "Rin",
+          layoutMode: "horizontal" as const,
+          lyrics: [
+            {
+              timeTag: "[00:11.42]",
+              text: "また誰かの「幸せ」がタイムラインを流れてく",
+            },
+            {
+              timeTag: "[00:16.71]",
+              text: "指先ひとつで　自分の価値が下がっていく気がした",
+            },
+            {
+              timeTag: "[00:23.01]",
+              text: "鏡に映る顔は　昨日よりも疲れていて",
+            },
+            {
+              timeTag: "[00:28.10]",
+              text: "「なんで自分だけ」って　飲み込んだ言葉が喉を焼く",
+            },
+            { timeTag: "[00:34.33]", text: "上手くいかないことばかり数えて" },
+            {
+              timeTag: "[00:39.32]",
+              text: "布団の中で　朝が来るのを怖がっている",
+            },
+            { timeTag: "[00:44.97]", text: "積み上げた期待は　簡単に崩れて" },
+            {
+              timeTag: "[00:50.33]",
+              text: "ため息と一緒に　部屋の隅へ溶けていく",
+            },
+            { timeTag: "[00:55.79]", text: "それでも心臓は　勝手に動いている" },
+            { timeTag: "[01:01.37]", text: "だから…" },
+            { timeTag: "[01:02.50]", text: "生きろ！" },
+            {
+              timeTag: "[01:04.28]",
+              text: "たとえ昨日までが　泥にまみれた失敗作でも",
+            },
+            { timeTag: "[01:13.68]", text: "生きろ！" },
+            {
+              timeTag: "[01:15.54]",
+              text: "変えられない過去に　足を取られても",
+            },
+            { timeTag: "[01:24.08]", text: "明日はまだ　一秒も始まっていない" },
+            {
+              timeTag: "[01:27.20]",
+              text: "白紙の時間を　その足で踏み出すために",
+            },
+            { timeTag: "[01:31.68]", text: "ただ、息を吸って　生きろ" },
+            {
+              timeTag: "[01:36.05]",
+              text: "「頑張れば報われる」なんて　綺麗な嘘だ",
+            },
+            {
+              timeTag: "[01:40.84]",
+              text: "擦りむいた膝の痛みが　現実を教えてくる",
+            },
+            {
+              timeTag: "[01:46.43]",
+              text: "正しさだけじゃ　守れないものもある",
+            },
+            {
+              timeTag: "[01:51.36]",
+              text: "失うことの連続で　空っぽになりそうだ",
+            },
+            {
+              timeTag: "[01:57.49]",
+              text: "それでも夜は明けて　世界は回り続ける",
+            },
+            { timeTag: "[02:03.02]", text: "だから…" },
+            { timeTag: "[02:04.21]", text: "生きろ！" },
+            {
+              timeTag: "[02:06.12]",
+              text: "明日のことなんて　誰にもわかりはしない",
+            },
+            { timeTag: "[02:15.53]", text: "生きろ！" },
+            {
+              timeTag: "[02:17.21]",
+              text: "その暗闇の先を　その目で見るために",
+            },
+            {
+              timeTag: "[02:25.59]",
+              text: "雨が止まないなら　濡れたまま行けばいい",
+            },
+            {
+              timeTag: "[02:31.23]",
+              text: "泥ハネさえ　今日の証（あかし）にしてしまえ",
+            },
+            { timeTag: "[02:37.34]", text: "明日を見るために　生きろ" },
+            {
+              timeTag: "[02:43.34]",
+              text: "今日つけた傷は　一生消えないかもしれない",
+            },
+            {
+              timeTag: "[02:48.55]",
+              text: "昨日失くしたものは　二度と帰ってこない",
+            },
+            {
+              timeTag: "[02:53.79]",
+              text: "それでも　錆びついた手すりを　握り直して",
+            },
+            { timeTag: "[02:59.40]", text: "冷たい風の匂いを　肺に満たして" },
+            { timeTag: "[03:04.75]", text: "新しい明日のために……" },
+            { timeTag: "[03:13.60]", text: "生きろ！" },
+            { timeTag: "[03:14.99]", text: "明日　来年　10年後…" },
+            {
+              timeTag: "[03:17.28]",
+              text: "シワの増えた手で　何を掴んでいる？",
+            },
+            { timeTag: "[03:24.47]", text: "すり減った鍵か　あたたかい手か" },
+            { timeTag: "[03:30.15]", text: "それを確かめるために" },
+            { timeTag: "[03:34.62]", text: "その答え合わせをするために" },
+            { timeTag: "[03:38.74]", text: "理由なんていらない" },
+            { timeTag: "[03:43.51]", text: "ただ　しがみついてでも　生きろ" },
+          ],
+          emphasisLines: [
+            { timeTag: "[01:02.50]", text: "生きろ！" },
+            { timeTag: "[01:13.68]", text: "生きろ！" },
+            { timeTag: "[02:04.21]", text: "生きろ！" },
+            { timeTag: "[02:15.53]", text: "生きろ！" },
+            { timeTag: "[03:13.60]", text: "生きろ！" },
+          ],
+          sections: [
+            {
+              name: "A1",
+              startTimeTag: "[00:11.42]",
+              overlayOpacity: 0.2,
+              fontScale: 0.95,
+            },
+            {
+              name: "B1",
+              startTimeTag: "[00:44.97]",
+              overlayOpacity: 0.28,
+              fontScale: 1,
+            },
+            {
+              name: "サビ1",
+              startTimeTag: "[01:02.50]",
+              overlayOpacity: 0.4,
+              fontScale: 1.2,
+            },
+            {
+              name: "A2",
+              startTimeTag: "[01:36.05]",
+              overlayOpacity: 0.2,
+              fontScale: 0.95,
+            },
+            {
+              name: "B2",
+              startTimeTag: "[02:03.02]",
+              overlayOpacity: 0.28,
+              fontScale: 1,
+            },
+            {
+              name: "サビ2",
+              startTimeTag: "[02:04.21]",
+              overlayOpacity: 0.4,
+              fontScale: 1.2,
+            },
+            {
+              name: "ブリッジ",
+              startTimeTag: "[02:43.34]",
+              overlayOpacity: 0.26,
+              fontScale: 1.05,
+            },
+            {
+              name: "ラスサビ",
+              startTimeTag: "[03:13.60]",
+              overlayOpacity: 0.42,
+              fontScale: 1.22,
+            },
+          ],
+          rightOffset: 3,
+          topOffset: 5,
         }}
       />
       <Composition
