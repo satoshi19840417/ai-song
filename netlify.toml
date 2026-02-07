@@ -1,0 +1,6 @@
+[build]
+  publish = "public/ai_movie_lab_site"
+  command = "echo 'No build needed'"
+
+[build.environment]
+  NODE_VERSION = "18"
