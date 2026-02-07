@@ -1683,126 +1683,93 @@
             const scrollElements = document.querySelectorAll('.scroll-reveal');
             scrollElements.forEach(el => observer.observe(el));
 
-            // Fetch Latest YouTube Video
+            // Fetch Latest YouTube Video using YouTube Data API v3
+            const API_KEY = 'AIzaSyAOkY74YSaWIXlX1wKeL1EbGus1FtdTKHk';
             const CHANNEL_ID = 'UCW96_b-PA11fp-wYC4laNtg';
-            const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
-            const API_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`;
+            const FULL_VIDEO_THRESHOLD = 180; // 3分（Shorts最大長）
+            const TIMEOUT_MS = 5000;
 
-            fetch(API_URL)
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('latest-video-container');
+            // フォールバック動画（本関数はnullを返し、呼び出し側でFALLBACKを使用）
+            const FALLBACK = { id: 'vzERE2bGPmQ', title: 'Akaneが歌う「仮面舞踏会」: 偽りの笑顔を脱ぎ捨て、自分を取り戻すAIの世界' };
 
-                    // Fallback ID as a known safe long-form video (Akaneが歌う「仮面舞踏会」)
-                    const FALLBACK_ID = 'vzERE2bGPmQ';
-                    const FALLBACK_TITLE = 'Akaneが歌う「仮面舞踏会」: 偽りの笑顔を脱ぎ捨て、自分を取り戻すAIの世界';
+            // ISO 8601 duration (PT3M30S) を秒数に変換
+            function parseDuration(iso) {
+                const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+                if (!match) return 0;
+                return (parseInt(match[1] || 0) * 3600) + (parseInt(match[2] || 0) * 60) + parseInt(match[3] || 0);
+            }
 
-                    if (data.items && data.items.length > 0) {
-                        // More robust filtering for full videos (excluding Shorts)
-                        // We check multiple videos since Shorts are posted more frequently
-                        const fullVideo = data.items.find(item => {
-                            const title = item.title;
-                            const titleLower = title.toLowerCase();
-                            const description = (item.description || '').toLowerCase();
+            // 動画を埋め込み表示
+            function displayVideo(videoId, title) {
+                const container = document.getElementById('latest-video-container');
+                const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
+                container.innerHTML = `
+                    <div class="video-wrapper">
+                        <iframe src="${embedUrl}" title="${title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <p class="g-title" style="margin-top:1.5rem;">${title}</p>
+                `;
+            }
 
-                            // Strong indicators of Shorts - reject immediately
-                            if (titleLower.includes('#short') ||
-                                titleLower.includes('#shorts') ||
-                                titleLower.includes('｜short') ||
-                                titleLower.includes('| short') ||
-                                titleLower.match(/\d+秒/) ||  // 10秒, 15秒, 30秒, 60秒 etc.
-                                title.includes('🩳')) {
-                                return false;
-                            }
+            async function fetchLatestFullVideo() {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-                            // Check for "shorts" or "ショート" but exclude if it's part of a breed name
-                            // British Shorthair = ブリティッシュショートヘア
-                            const hasShortWord = titleLower.includes('shorts') || titleLower.includes('ショート');
-                            const isBreedName = titleLower.includes('ショートヘア') ||
-                                titleLower.includes('shorthair') ||
-                                titleLower.includes('ショートヘアー');
+                try {
+                    // 1. チャンネルのuploads playlistIdを取得
+                    const channelRes = await fetch(
+                        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`,
+                        { signal: controller.signal }
+                    );
+                    if (!channelRes.ok) throw new Error(`Channel API: ${channelRes.status}`);
+                    const channelData = await channelRes.json();
+                    if (!channelData.items?.length) throw new Error('Channel not found');
+                    const uploadsId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
-                            if (hasShortWord && !isBreedName) {
-                                return false;
-                            }
+                    // 2. 最新動画IDを取得（最大10件、投稿順を保持）
+                    const playlistRes = await fetch(
+                        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsId}&maxResults=10&key=${API_KEY}`,
+                        { signal: controller.signal }
+                    );
+                    if (!playlistRes.ok) throw new Error(`Playlist API: ${playlistRes.status}`);
+                    const playlistData = await playlistRes.json();
+                    if (!playlistData.items?.length) throw new Error('No videos found');
+                    // 投稿順序を保持するためIDリストの順番を記録
+                    const orderedIds = playlistData.items.map(i => i.contentDetails.videoId);
 
-                            // Check for specific Short formats in Japanese titles like "【ショート】", "〈ショート〉"
-                            if (/[【〈\(].*ショート.*[】〉\)]/.test(title)) {
-                                return false;
-                            }
+                    // 3. duration取得
+                    const videosRes = await fetch(
+                        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${orderedIds.join(',')}&key=${API_KEY}`,
+                        { signal: controller.signal }
+                    );
+                    if (!videosRes.ok) throw new Error(`Videos API: ${videosRes.status}`);
+                    const videosData = await videosRes.json();
+                    if (!videosData.items?.length) throw new Error('Video details not found');
 
-                            // Check description for shorts indicators
-                            if (description.includes('#short') ||
-                                description.includes('#shorts') ||
-                                (description.includes('short') && !description.includes('shorthair'))) {
-                                return false;
-                            }
+                    // videos.listは順序保証なし → 元の投稿順で再整列
+                    const videoMap = new Map(videosData.items.map(v => [v.id, v]));
+                    const sortedVideos = orderedIds.map(id => videoMap.get(id)).filter(Boolean);
 
-                            // Additional heuristic: look for vertical video indicators
-                            if (titleLower.includes('vertical') || titleLower.includes('縦型')) {
-                                return false;
-                            }
+                    // 最新のフル動画（180秒超）を返す。該当なしはnull
+                    return sortedVideos.find(v => parseDuration(v.contentDetails.duration) > FULL_VIDEO_THRESHOLD) ?? null;
 
-                            // Filter out ASMR animal videos (typically shorts)
-                            // Most animal ASMR content is short-form (10-60 seconds)
-                            // We want to keep full music videos and movies
-                            const hasASMR = titleLower.includes('asmr') ||
-                                titleLower.includes('イヤホン推奨') ||
-                                titleLower.includes('癒し');
+                } catch (err) {
+                    console.error('API Error:', err.message);
+                    return null; // フォールバックへ
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            }
 
-                            const hasAnimal = titleLower.includes('赤ちゃん') ||
-                                titleLower.includes('子犬') ||
-                                titleLower.includes('子猫') ||
-                                titleLower.includes('ショートヘア') ||  // Breed names usually indicate animal ASMR
-                                titleLower.includes('チワワ') ||
-                                titleLower.includes('プードル') ||
-                                titleLower.includes('猫') ||
-                                titleLower.includes('犬');
-
-                            // If it has ASMR + animal keywords, it's likely a short ASMR video
-                            if (hasASMR && hasAnimal) {
-                                return false;
-                            }
-
-                            return true;
-                        }); // Use the found video, or fallback to the specific known latest long video if filter excludes everything
-                        const targetVideo = fullVideo || { guid: `yt:video:${FALLBACK_ID}`, title: FALLBACK_TITLE };
-
-                        // RSS guid is usually "yt:video:[VIDEO_ID]"
-                        const videoId = targetVideo.guid.split(':')[2];
-                        const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
-
-                        container.innerHTML = `
-                            <div class="video-wrapper">
-                                <iframe src="${embedUrl}" title="${targetVideo.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            </div>
-                            <p class="g-title" style="margin-top:1.5rem;">${targetVideo.title}</p>
-                        `;
-                    } else {
-                        // If no data, use fallback
-                        const embedUrl = `https://www.youtube.com/embed/${FALLBACK_ID}?rel=0`;
-                        container.innerHTML = `
-                            <div class="video-wrapper">
-                                <iframe src="${embedUrl}" title="${FALLBACK_TITLE}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            </div>
-                            <p class="g-title" style="margin-top:1.5rem;">${FALLBACK_TITLE}</p>
-                        `;
-                    }
-                })
-                .catch(err => {
-                    console.error('Error fetching video:', err);
-                    // Fallback on error too
-                    const FALLBACK_ID = 'fg6h07NYbC4';
-                    const FALLBACK_TITLE = '空白の雪 - AI Music Video 【冬の切ないバラード】';
-                    const embedUrl = `https://www.youtube.com/embed/${FALLBACK_ID}?rel=0`;
-
-                    document.getElementById('latest-video-container').innerHTML = `
-                        <div class="video-wrapper">
-                            <iframe src="${embedUrl}" title="${FALLBACK_TITLE}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                        <p class="g-title" style="margin-top:1.5rem;">${FALLBACK_TITLE}</p>
-                    `;
-                });
+            // 実行
+            fetchLatestFullVideo().then(video => {
+                if (video) {
+                    displayVideo(video.id, video.snippet.title);
+                } else {
+                    // フォールバック動画を表示
+                    displayVideo(FALLBACK.id, FALLBACK.title);
+                }
+            });
         });
     </script>
     <script>
