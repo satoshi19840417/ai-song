@@ -30,9 +30,19 @@
               "icon": "lucide-file",
               "title": "SNG-2026-0002_神様のイタズラ"
             }
+          },
+          {
+            "id": "b2607d69069ca94b",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -191,7 +201,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "c14a306961a003d4",
+  "active": "b2607d69069ca94b",
   "lastOpenFiles": [
     "Suno/Untitled.base",
     "無題のファイル.canvas",

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:x.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:skillsmp.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl:*)",
+      "Bash(del \"c:\\\\Users\\\\sench\\\\remotion-test-work\\\\my-remotion-01\\\\.agent\\\\skills\\\\suno-sync-update\\\\scripts\\\\test_fetched.json\")",
+      "mcp__plugin_claude-mem_mcp-search__save_memory",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add propose-sora-prompts skill with 2-stage workflow\n\nSora2動画生成用のプロンプトを複数案提案してから詳細化する新しいスキルを追加。\n\n新規ファイル:\n- .agent/skills/propose-sora-prompts/SKILL.md\n  - Stage 1: 3〜5つの方向性案を提示してユーザー選択を促す\n  - Stage 2: 選択された案を詳細なprompt.mdに仕上げる\n- .agent/skills/propose-sora-prompts/references/sora2-prompt-guide.md\n  - カメラ・ライティング・雰囲気の語彙集\n  - 時間別構成テンプレート\n  - ベストプラクティスとチェックリスト\n- plans/vast-wishing-abelson.md\n  - 実装プラン（設計書）\n\n既存のcreate_sora_promptスキル（1段階直接作成）との差別化により、\nアイデア探索段階でのビデオコンセプト検討をサポート。\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

@@ -6,7 +6,7 @@ status: released
 created: 2026-01-02
 updated: 2026-01-02
 tags: [応援歌, J-Pop, ポジティブ, 新生活]
-suno_song_url: 
+suno_song_url: https://suno.com/song/8ac07636-6b95-4b69-8434-a0a09cbf931f
 ---
 
 ## 1) Style
