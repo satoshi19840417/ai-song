@@ -679,7 +679,6 @@ export const HayazakiNoHaruVideo: React.FC<
                         from={startFrame}
                         durationInFrames={durationFrames}
                         layout="none"
-                        premountFor={getPremountDuration(fps)}
                     >
                         {isLastLine ? (
                             <FinalLyricLine
