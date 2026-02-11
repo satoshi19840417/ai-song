@@ -130,7 +130,7 @@ const StandardLyricLine: React.FC<{
                 right: 0,
                 textAlign: "center",
                 fontSize,
-                fontFamily: "'Klee One', cursive",
+                fontFamily: "'Yomogi', cursive",
                 fontWeight: 400,
                 color,
                 textShadow:
@@ -193,7 +193,7 @@ const EmphasisLyricLine: React.FC<{
                 right: 0,
                 textAlign: "center",
                 fontSize: fontSize * 1.15,
-                fontFamily: "'Klee One', cursive",
+                fontFamily: "'Yomogi', cursive",
                 fontWeight: 400,
                 color,
                 textShadow: `
@@ -255,7 +255,7 @@ const TurningPointLine: React.FC<{
                 transform: `translate(-50%, -50%) scale(${scale})`,
                 textAlign: "center",
                 fontSize: fontSize * 1.2,
-                fontFamily: "'Klee One', cursive",
+                fontFamily: "'Yomogi', cursive",
                 fontWeight: 600,
                 color,
                 textShadow: `
@@ -364,7 +364,7 @@ const FinalLyricLine: React.FC<{
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     textAlign: "center",
                     fontSize: fontSize * 1.6,
-                    fontFamily: "'Klee One', cursive",
+                    fontFamily: "'Yomogi', cursive",
                     fontWeight: 600,
                     color,
                     textShadow: `
@@ -410,45 +410,53 @@ const FinalLyricLine: React.FC<{
 };
 
 // ============================
-// Opening Title (タイプライター + 梅の花)
+// Opening Title (花が咲くように登場 → 散るように消える)
 // ============================
 const OpeningTitle: React.FC<{
     title: string;
 }> = ({ title }) => {
     const frame = useCurrentFrame();
-    const duration = 330; // 11 seconds
+    const { fps } = useVideoConfig();
+    const duration = 330;
 
-    // Typewriter effect for title
-    const charsPerFrame = 0.1; // Slightly slower for melancholic feel
-    const visibleTitleChars = Math.min(
-        title.length,
-        Math.floor(frame * charsPerFrame)
-    );
-    const displayTitle = title.slice(0, visibleTitleChars);
-    const showCursor = frame < title.length / charsPerFrame + 30;
+    const chars = title.split("");
+    const bloomEnd = 120; // 咲き終わり
+    const scatterStart = 230; // 散り始め
 
-    // Decoration line timing
-    const decorStartFrame = Math.ceil(title.length / charsPerFrame) + 20;
-
-    // Fade out at end
-    const opacity = interpolate(
-        frame,
-        [0, 20, duration - 50, duration],
-        [0, 1, 1, 0],
-        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-    );
-
-    // Gentle floating
+    // Gentle floating during hold
     const floatY = Math.sin(frame * 0.025) * 4;
 
-    // Sparkling glow
     const glowIntensity = 12 + Math.sin(frame * 0.12) * 6;
 
-    // Cool lavender title color
     const titleColor = interpolateColors(
         frame,
         [0, duration / 2, duration],
         ["#e8d8f0", "#d4c0e0", "#e8d8f0"]
+    );
+
+    // 散る方向（文字ごとに決定的に異なる）
+    const getScatterDir = (i: number) => {
+        const angle = ((i * 137.5) % 360) * (Math.PI / 180);
+        const dist = 250 + (i % 3) * 120;
+        return {
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist - 180,
+            rot: (i % 2 === 0 ? 1 : -1) * (25 + (i % 4) * 20),
+        };
+    };
+
+    // Decoration line
+    const decorLineOpacity = interpolate(
+        frame,
+        [bloomEnd + 20, bloomEnd + 40, scatterStart, scatterStart + 40],
+        [0, 0.6, 0.6, 0],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+    const decorLineWidth = interpolate(
+        frame,
+        [bloomEnd + 20, bloomEnd + 65],
+        [0, 180],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     );
 
     return (
@@ -463,8 +471,6 @@ const OpeningTitle: React.FC<{
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                opacity,
-                transform: `translateY(${floatY}px)`,
             }}
         >
             {/* Decorative plum blossoms */}
@@ -472,7 +478,12 @@ const OpeningTitle: React.FC<{
                 style={{
                     position: "absolute",
                     fontSize: 28,
-                    opacity: 0.25,
+                    opacity: interpolate(
+                        frame,
+                        [30, 60, scatterStart, scatterStart + 50],
+                        [0, 0.25, 0.25, 0],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    ),
                     top: "32%",
                     left: "27%",
                     transform: `rotate(-10deg) scale(${1 + Math.sin(frame * 0.06) * 0.08})`,
@@ -486,7 +497,12 @@ const OpeningTitle: React.FC<{
                 style={{
                     position: "absolute",
                     fontSize: 22,
-                    opacity: 0.2,
+                    opacity: interpolate(
+                        frame,
+                        [50, 80, scatterStart, scatterStart + 50],
+                        [0, 0.2, 0.2, 0],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    ),
                     top: "36%",
                     right: "30%",
                     transform: `rotate(15deg) scale(${1 + Math.sin(frame * 0.08 + 1) * 0.08})`,
@@ -497,53 +513,90 @@ const OpeningTitle: React.FC<{
                 ✿
             </div>
 
-            {/* Main Title */}
-            <h1
+            {/* Title characters — bloom in, scatter out */}
+            <div
                 style={{
-                    fontFamily: "'Klee One', cursive",
-                    fontSize: 80,
-                    fontWeight: 400,
-                    color: titleColor,
-                    marginBottom: 25,
-                    textShadow: `
-                        0 0 ${glowIntensity}px rgba(200, 170, 210, 0.8),
-                        0 0 ${glowIntensity * 2}px rgba(180, 150, 200, 0.4),
-                        3px 3px 8px rgba(20, 10, 40, 0.6)
-                    `,
-                    letterSpacing: "0.12em",
+                    display: "flex",
+                    justifyContent: "center",
                     minHeight: "1.2em",
+                    marginBottom: 25,
                 }}
             >
-                {displayTitle}
-                {showCursor && visibleTitleChars < title.length && (
-                    <span
-                        style={{
-                            opacity: Math.sin(frame * 0.3) > 0 ? 0.6 : 0.15,
-                            color: "#d4c0e0",
-                        }}
-                    >
-                        │
-                    </span>
-                )}
-            </h1>
+                {chars.map((char, i) => {
+                    // === Bloom（咲く）===
+                    const charDelay = i * (bloomEnd / chars.length);
+                    const bloomSpr = spring({
+                        frame: Math.max(0, frame - charDelay),
+                        fps,
+                        config: { damping: 12, stiffness: 80, mass: 0.8 },
+                    });
+                    const bloomScale = interpolate(bloomSpr, [0, 1], [0, 1]);
+                    const bloomOpacity = interpolate(
+                        frame,
+                        [charDelay, charDelay + 25],
+                        [0, 1],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    );
+
+                    // === Scatter（散る）===
+                    const s = getScatterDir(i);
+                    const scatterDelay = scatterStart + i * 6;
+                    const sp = interpolate(
+                        frame,
+                        [scatterDelay, scatterDelay + 70],
+                        [0, 1],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    );
+                    // ease-in for natural petal fall
+                    const eased = sp * sp;
+
+                    const tx = eased * s.x;
+                    const ty = eased * s.y;
+                    const rot = eased * s.rot;
+                    const scatterOpacity = interpolate(
+                        sp,
+                        [0, 0.4, 1],
+                        [1, 0.7, 0],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    );
+
+                    const finalScale = bloomScale * (1 - eased * 0.4);
+                    const finalOpacity = bloomOpacity * scatterOpacity;
+
+                    return (
+                        <span
+                            key={i}
+                            style={{
+                                display: "inline-block",
+                                fontFamily: "'Yomogi', cursive",
+                                fontSize: 80,
+                                fontWeight: 400,
+                                color: titleColor,
+                                textShadow: `
+                                    0 0 ${glowIntensity}px rgba(200, 170, 210, 0.8),
+                                    0 0 ${glowIntensity * 2}px rgba(180, 150, 200, 0.4),
+                                    3px 3px 8px rgba(20, 10, 40, 0.6)
+                                `,
+                                letterSpacing: "0.12em",
+                                opacity: finalOpacity,
+                                transform: `translateX(${tx}px) translateY(${floatY + ty}px) scale(${finalScale}) rotate(${rot}deg)`,
+                            }}
+                        >
+                            {char}
+                        </span>
+                    );
+                })}
+            </div>
 
             {/* Decoration line */}
             <div
                 style={{
-                    width: interpolate(
-                        frame,
-                        [decorStartFrame, decorStartFrame + 45],
-                        [0, 180],
-                        {
-                            extrapolateLeft: "clamp",
-                            extrapolateRight: "clamp",
-                        }
-                    ),
+                    width: decorLineWidth,
                     height: 1.5,
                     background:
                         "linear-gradient(90deg, transparent, rgba(200, 170, 210, 0.6), transparent)",
                     marginTop: 15,
-                    opacity: frame > decorStartFrame ? 0.6 : 0,
+                    opacity: decorLineOpacity,
                 }}
             />
         </div>
