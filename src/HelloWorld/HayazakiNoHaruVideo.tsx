@@ -274,7 +274,7 @@ const TurningPointLine: React.FC<{
 };
 
 // ============================
-// Final Lyric Line (ラスト「これが私の 早咲きの春」)
+// Final Lyric Line (「これが私の」散る → 「早咲きの春」余韻で残る)
 // ============================
 const FinalLyricLine: React.FC<{
     text: string;
@@ -284,32 +284,72 @@ const FinalLyricLine: React.FC<{
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
 
-    // Dramatic entrance with heavy spring
-    const spr = spring({
+    // テキストを前半・後半に分割
+    const spaceIdx = text.indexOf(" ") !== -1 ? text.indexOf(" ") : text.indexOf("　");
+    const prefixChars = (spaceIdx >= 0 ? text.slice(0, spaceIdx) : text).split("");
+    const suffixText = spaceIdx >= 0 ? text.slice(spaceIdx + 1) : "";
+
+    // タイミング
+    const scatterStart = 120; // 前半が散り始め
+    const suffixFadeStart = duration - 90; // 後半のフェードアウト開始
+
+    // 共通の登場アニメーション
+    const entranceSpr = spring({
         frame,
         fps,
         config: { damping: 15, stiffness: 80, mass: 2 },
     });
-    const scale = interpolate(spr, [0, 1], [0.3, 1.1]);
-
-    const opacity = interpolate(
+    const entranceScale = interpolate(entranceSpr, [0, 1], [0.3, 1.1]);
+    const entranceOpacity = interpolate(
         frame,
-        [0, 35, duration - 90, duration],
-        [0, 1, 1, 0],
+        [0, 35],
+        [0, 1],
         { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     );
 
-    // Pulsing glow
     const glowIntensity = 18 + Math.sin(frame * 0.1) * 10;
 
-    // Color: white → warm plum blossom
     const color = interpolateColors(
         frame,
         [0, duration * 0.4, duration],
         ["#ffffff", "#f2c4d0", "#e8a0b8"]
     );
 
-    // Scattered plum petals
+    // 前半文字の散る方向
+    const getScatterDir = (i: number) => {
+        const angle = ((i * 137.5 + 30) % 360) * (Math.PI / 180);
+        const dist = 200 + (i % 3) * 100;
+        return {
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist - 120,
+            rot: (i % 2 === 0 ? 1 : -1) * (30 + (i % 4) * 15),
+        };
+    };
+
+    // 後半「早咲きの春」のアニメーション
+    // 前半が散り終わった後(~200f)から拡大開始
+    const scatterEnd = scatterStart + prefixChars.length * 8 + 60;
+    const suffixExtraScale = interpolate(
+        frame,
+        [scatterEnd, scatterEnd + 80],
+        [1, 1.25],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+    const suffixOpacity = interpolate(
+        frame,
+        [0, 35, suffixFadeStart, duration],
+        [0, 1, 1, 0],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+    // 前半が散った後、後半が中央に寄るオフセット
+    const suffixCenterShift = interpolate(
+        frame,
+        [scatterStart, scatterEnd],
+        [0, 1],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+
+    // 花びらパーティクル
     const petals = [
         { x: -180, delay: 0, size: 14 },
         { x: 160, delay: 20, size: 11 },
@@ -320,7 +360,7 @@ const FinalLyricLine: React.FC<{
 
     return (
         <>
-            {/* Falling petals around the final text */}
+            {/* Falling petals */}
             {petals.map((petal, i) => {
                 const petalFrame = Math.max(0, frame - petal.delay);
                 const petalY = interpolate(petalFrame, [0, 150], [80, -250], {
@@ -345,8 +385,7 @@ const FinalLyricLine: React.FC<{
                             width: petal.size,
                             height: petal.size * 0.7,
                             borderRadius: "50% 0 50% 0",
-                            background:
-                                "linear-gradient(135deg, #f2c4d0, #e8a0b8)",
+                            background: "linear-gradient(135deg, #f2c4d0, #e8a0b8)",
                             transform: `translateY(${petalY}px) rotate(${petalRotate}deg)`,
                             opacity: petalOpacity,
                             filter: "blur(0.5px)",
@@ -355,32 +394,102 @@ const FinalLyricLine: React.FC<{
                 );
             })}
 
-            {/* Main final text */}
+            {/* テキスト全体のコンテナ */}
             <div
                 style={{
                     position: "absolute",
                     top: "50%",
                     left: "50%",
-                    transform: `translate(-50%, -50%) scale(${scale})`,
-                    textAlign: "center",
-                    fontSize: fontSize * 1.6,
-                    fontFamily: "'Yomogi', cursive",
-                    fontWeight: 600,
-                    color,
-                    textShadow: `
-                        0 0 ${glowIntensity}px rgba(210, 160, 190, 0.7),
-                        0 0 ${glowIntensity * 2}px rgba(180, 140, 180, 0.4),
-                        3px 3px 10px rgba(40, 20, 60, 0.5)
-                    `,
-                    opacity,
-                    letterSpacing: "0.12em",
+                    transform: `translate(-50%, -50%) scale(${entranceScale})`,
+                    display: "flex",
+                    alignItems: "baseline",
                     whiteSpace: "nowrap",
                 }}
             >
-                {text}
+                {/* 前半「これが私の」— 散る演出 */}
+                {prefixChars.map((char, i) => {
+                    const s = getScatterDir(i);
+                    const delay = scatterStart + i * 8;
+                    const sp = interpolate(
+                        frame,
+                        [delay, delay + 60],
+                        [0, 1],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    );
+                    const eased = sp * sp;
+
+                    const tx = eased * s.x;
+                    const ty = eased * s.y;
+                    const rot = eased * s.rot;
+                    const charScale = 1 - eased * 0.4;
+                    const charOpacity = entranceOpacity * interpolate(
+                        sp,
+                        [0, 0.3, 1],
+                        [1, 0.7, 0],
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                    );
+
+                    return (
+                        <span
+                            key={`p-${i}`}
+                            style={{
+                                display: "inline-block",
+                                fontSize: fontSize * 1.6,
+                                fontFamily: "'Yomogi', cursive",
+                                fontWeight: 400,
+                                color,
+                                textShadow: `
+                                    0 0 ${glowIntensity}px rgba(210, 160, 190, 0.7),
+                                    0 0 ${glowIntensity * 2}px rgba(180, 140, 180, 0.4),
+                                    3px 3px 10px rgba(40, 20, 60, 0.5)
+                                `,
+                                letterSpacing: "0.12em",
+                                opacity: charOpacity,
+                                transform: `translateX(${tx}px) translateY(${ty}px) scale(${charScale}) rotate(${rot}deg)`,
+                            }}
+                        >
+                            {char}
+                        </span>
+                    );
+                })}
+
+                {/* スペース — 散る時に消える */}
+                <span
+                    style={{
+                        display: "inline-block",
+                        width: "0.4em",
+                        opacity: interpolate(
+                            frame,
+                            [scatterStart, scatterStart + 30],
+                            [1, 0],
+                            { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+                        ),
+                    }}
+                />
+
+                {/* 後半「早咲きの春」— 余韻で残り、通常フェードアウト */}
+                <span
+                    style={{
+                        display: "inline-block",
+                        fontSize: fontSize * 1.6,
+                        fontFamily: "'Yomogi', cursive",
+                        fontWeight: 400,
+                        color,
+                        textShadow: `
+                            0 0 ${glowIntensity}px rgba(210, 160, 190, 0.7),
+                            0 0 ${glowIntensity * 2}px rgba(180, 140, 180, 0.4),
+                            3px 3px 10px rgba(40, 20, 60, 0.5)
+                        `,
+                        letterSpacing: "0.12em",
+                        opacity: suffixOpacity,
+                        transform: `translateX(${suffixCenterShift * -30}px) scale(${suffixExtraScale})`,
+                    }}
+                >
+                    {suffixText}
+                </span>
             </div>
 
-            {/* Subtle underline decoration */}
+            {/* Underline decoration */}
             <div
                 style={{
                     position: "absolute",
@@ -398,10 +507,7 @@ const FinalLyricLine: React.FC<{
                         frame,
                         [40, 70, duration - 60, duration],
                         [0, 0.7, 0.5, 0],
-                        {
-                            extrapolateLeft: "clamp",
-                            extrapolateRight: "clamp",
-                        }
+                        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
                     ),
                 }}
             />
@@ -623,11 +729,8 @@ export const HayazakiNoHaruVideo: React.FC<
         text.includes("みんなは振り向く") ||
         text.includes("私はもう");
 
-    // Turning point lines (hope / defiance)
+    // Turning point lines (中央表示 — ラスト付近のみ)
     const isTurningPoint = (text: string) =>
-        text.includes("でもね") ||
-        text.includes("桜より深い") ||
-        text.includes("誰かがきっと") ||
         text.includes("私の春を") ||
         text.includes("また来年も");
 
@@ -700,7 +803,7 @@ export const HayazakiNoHaruVideo: React.FC<
                         )
                     );
                 } else {
-                    durationFrames = 300; // 10 seconds for final line
+                    durationFrames = 420; // 14 seconds for final line
                 }
 
                 const isLastLine = !nextLine;
