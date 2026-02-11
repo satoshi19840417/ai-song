@@ -11,7 +11,7 @@ import {
     spring,
 } from "remotion";
 import { z } from "zod";
-import { audioFadeCurve, getPremountDuration } from "./animationUtils";
+import { audioFadeCurve } from "./animationUtils";
 
 // Schema for props
 export const hayazakiNoHaruSchema = z.object({
@@ -650,7 +650,6 @@ export const HayazakiNoHaruVideo: React.FC<
             <Sequence
                 from={15}
                 durationInFrames={330}
-                premountFor={getPremountDuration(fps)}
             >
                 <OpeningTitle title={props.title} artist={props.artist} />
             </Sequence>
