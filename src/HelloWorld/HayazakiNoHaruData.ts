@@ -1,0 +1,36 @@
+/* eslint-disable no-irregular-whitespace */
+import { staticFile } from "remotion";
+
+export const hayazakiNoHaruData = {
+    title: "早咲きの春",
+    artist: "Suno AI",
+    videoSource: staticFile("suno_PJ/done/早咲きの春full.mp4"),
+    lyrics: [
+        { timeTag: "[00:12.22]", text: "まだ雪が残る土の上で" },
+        { timeTag: "[00:17.38]", text: "誰より先に花を開いた" },
+        { timeTag: "[00:24.08]", text: "誰かに見せたくて咲いたのに" },
+        { timeTag: "[00:29.35]", text: "冷たい風に揺れながら" },
+        { timeTag: "[00:35.42]", text: "いつもそう、いつもそう" },
+        { timeTag: "[00:37.92]", text: "走り出すのが早すぎて" },
+        { timeTag: "[00:46.40]", text: "梅の花みたい 早咲きばかり" },
+        { timeTag: "[00:51.68]", text: "私が散る頃に 桜が笑う" },
+        { timeTag: "[00:58.26]", text: "みんなは振り向く 桜の方に" },
+        { timeTag: "[01:04.21]", text: "私はもう 葉になってた" },
+        { timeTag: "[01:21.05]", text: "あなたはいつも 春の陽だまりの中" },
+        { timeTag: "[01:25.04]", text: "遅れてきてもなぜか輝いて" },
+        { timeTag: "[01:28.21]", text: "「遅いね」って言いたいのに" },
+        { timeTag: "[01:30.40]", text: "その笑顔に何も言えなくて" },
+        { timeTag: "[01:33.50]", text: "いつもそう、いつもそう" },
+        { timeTag: "[01:36.25]", text: "タイミングが少しずれてて" },
+        { timeTag: "[01:44.60]", text: "梅の花みたい 早咲きばかり" },
+        { timeTag: "[01:49.64]", text: "私が散る頃に 桜が笑う" },
+        { timeTag: "[01:55.88]", text: "みんなは振り向く 桜の方に" },
+        { timeTag: "[02:01.85]", text: "私はもう 葉になってた" },
+        { timeTag: "[02:07.40]", text: "でもね、梅の香りは" },
+        { timeTag: "[02:10.59]", text: "桜より深いって知ってる？" },
+        { timeTag: "[02:14.07]", text: "誰かがきっと気づいてくれる" },
+        { timeTag: "[02:22.04]", text: "私の春を" },
+        { timeTag: "[02:24.31]", text: "また来年も 先に咲いてみせる" },
+        { timeTag: "[02:30.34]", text: "これが私の 早咲きの春" },
+    ],
+};
