@@ -78,10 +78,12 @@ This skill automates the process of creating a new lyric video component in the 
     *   **CRITICAL**: Move source files from `public/suno_PJ/new` to `public/suno_PJ/done`.
     *   Create the `done` directory if it doesn't exist.
 
-8.  **Launch Preview Via Dedicated Skill**
-    *   Use `remotion-preview-launch` after generation.
+8.  **Launch Preview Via Dedicated Skill (CRITICAL — 必ず実行)**
+    *   **必ず** `remotion-preview-launch` スキルの SKILL.md を読み、そのワークフローに従って起動する。
+    *   PowerShellスクリプト: `.agent/skills/remotion-preview-launch/scripts/start_remotion_dev.ps1`
     *   Return the detected Remotion URL, PID, and stop command.
     *   Do not assume `http://localhost:3000`; always report the detected URL.
+    *   **このステップをスキップしてはならない。**
 
 ## Animation Best Practices Reference
 

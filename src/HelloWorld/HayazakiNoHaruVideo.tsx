@@ -130,7 +130,7 @@ const StandardLyricLine: React.FC<{
                 right: 0,
                 textAlign: "center",
                 fontSize,
-                fontFamily: "'Hina Mincho', serif",
+                fontFamily: "'Klee One', cursive",
                 fontWeight: 400,
                 color,
                 textShadow:
@@ -193,7 +193,7 @@ const EmphasisLyricLine: React.FC<{
                 right: 0,
                 textAlign: "center",
                 fontSize: fontSize * 1.15,
-                fontFamily: "'Hina Mincho', serif",
+                fontFamily: "'Klee One', cursive",
                 fontWeight: 400,
                 color,
                 textShadow: `
@@ -255,7 +255,7 @@ const TurningPointLine: React.FC<{
                 transform: `translate(-50%, -50%) scale(${scale})`,
                 textAlign: "center",
                 fontSize: fontSize * 1.2,
-                fontFamily: "'Yuji Syuku', serif",
+                fontFamily: "'Klee One', cursive",
                 fontWeight: 600,
                 color,
                 textShadow: `
@@ -364,7 +364,7 @@ const FinalLyricLine: React.FC<{
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     textAlign: "center",
                     fontSize: fontSize * 1.6,
-                    fontFamily: "'Yuji Syuku', serif",
+                    fontFamily: "'Klee One', cursive",
                     fontWeight: 600,
                     color,
                     textShadow: `
@@ -414,8 +414,7 @@ const FinalLyricLine: React.FC<{
 // ============================
 const OpeningTitle: React.FC<{
     title: string;
-    artist: string;
-}> = ({ title, artist }) => {
+}> = ({ title }) => {
     const frame = useCurrentFrame();
     const duration = 330; // 11 seconds
 
@@ -428,13 +427,8 @@ const OpeningTitle: React.FC<{
     const displayTitle = title.slice(0, visibleTitleChars);
     const showCursor = frame < title.length / charsPerFrame + 30;
 
-    // Artist appears after title
-    const artistStartFrame = Math.ceil(title.length / charsPerFrame) + 20;
-    const visibleArtistChars = Math.min(
-        artist.length,
-        Math.max(0, Math.floor((frame - artistStartFrame) * charsPerFrame * 1.5))
-    );
-    const displayArtist = artist.slice(0, visibleArtistChars);
+    // Decoration line timing
+    const decorStartFrame = Math.ceil(title.length / charsPerFrame) + 20;
 
     // Fade out at end
     const opacity = interpolate(
@@ -506,9 +500,9 @@ const OpeningTitle: React.FC<{
             {/* Main Title */}
             <h1
                 style={{
-                    fontFamily: "'Yuji Syuku', serif",
+                    fontFamily: "'Klee One', cursive",
                     fontSize: 80,
-                    fontWeight: 600,
+                    fontWeight: 400,
                     color: titleColor,
                     marginBottom: 25,
                     textShadow: `
@@ -533,29 +527,12 @@ const OpeningTitle: React.FC<{
                 )}
             </h1>
 
-            {/* Artist Name */}
-            {visibleArtistChars > 0 && (
-                <h2
-                    style={{
-                        fontFamily: "'Zen Kurenaido', sans-serif",
-                        fontSize: 34,
-                        fontWeight: 500,
-                        color: "rgba(220, 210, 230, 0.9)",
-                        textShadow:
-                            "0 0 10px rgba(180, 160, 200, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4)",
-                        letterSpacing: "0.1em",
-                    }}
-                >
-                    {displayArtist}
-                </h2>
-            )}
-
             {/* Decoration line */}
             <div
                 style={{
                     width: interpolate(
                         frame,
-                        [artistStartFrame, artistStartFrame + 45],
+                        [decorStartFrame, decorStartFrame + 45],
                         [0, 180],
                         {
                             extrapolateLeft: "clamp",
@@ -566,7 +543,7 @@ const OpeningTitle: React.FC<{
                     background:
                         "linear-gradient(90deg, transparent, rgba(200, 170, 210, 0.6), transparent)",
                     marginTop: 15,
-                    opacity: frame > artistStartFrame ? 0.6 : 0,
+                    opacity: frame > decorStartFrame ? 0.6 : 0,
                 }}
             />
         </div>
@@ -651,7 +628,7 @@ export const HayazakiNoHaruVideo: React.FC<
                 from={15}
                 durationInFrames={330}
             >
-                <OpeningTitle title={props.title} artist={props.artist} />
+                <OpeningTitle title={props.title} />
             </Sequence>
 
             {/* Lyric Lines */}
@@ -660,10 +637,14 @@ export const HayazakiNoHaruVideo: React.FC<
                 const nextLine = parsedLyrics[index + 1];
 
                 let durationFrames: number;
+                const maxLyricDuration = Math.round(6 * fps); // 6秒で間奏中の表示を防ぐ
                 if (nextLine) {
-                    durationFrames = Math.max(
-                        1,
-                        Math.round((nextLine.seconds - line.seconds) * fps)
+                    durationFrames = Math.min(
+                        maxLyricDuration,
+                        Math.max(
+                            1,
+                            Math.round((nextLine.seconds - line.seconds) * fps)
+                        )
                     );
                 } else {
                     durationFrames = 300; // 10 seconds for final line
