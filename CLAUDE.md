@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## Skill-First Rule（最優先）
+
+リクエストに回答する前に、必ず `AGENTS.md` の「Available skills」を確認し、合致するスキルがあればそのワークフローに従うこと。スキルを使わず直接回答するのは禁止（合致するスキルがある場合）。
+
 ## Plan Creation
 
 Whenever you create a markdown file in the `./plans` directory, please make sure to have it reviewed by Codex using the codex-review skill.
