@@ -87,6 +87,11 @@ import {
   studySessionSchema,
 } from "./HelloWorld/StudySessionOpening";
 import { studySessionData } from "./HelloWorld/StudySessionData";
+import {
+  HayazakiNoHaruVideo,
+  hayazakiNoHaruSchema,
+} from "./HelloWorld/HayazakiNoHaruVideo";
+import { hayazakiNoHaruData } from "./HelloWorld/HayazakiNoHaruData";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -1761,6 +1766,24 @@ export const RemotionRoot: React.FC = () => {
             { timeTag: "[02:49.93]", text: "これからは　この手で" },
             { timeTag: "[02:54.67]", text: "目の前の君を　笑顔にするよ" },
           ],
+        }}
+      />
+      {/* 早咲きの春 - 切ないリリック動画 */}
+      <Composition
+        id="HayazakiNoHaru"
+        component={HayazakiNoHaruVideo}
+        durationInFrames={5100}
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={hayazakiNoHaruSchema}
+        defaultProps={{
+          fontSize: 42,
+          bottomOffset: 110,
+          title: hayazakiNoHaruData.title,
+          artist: hayazakiNoHaruData.artist,
+          videoSource: hayazakiNoHaruData.videoSource,
+          lyrics: hayazakiNoHaruData.lyrics,
         }}
       />
     </>
