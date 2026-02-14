@@ -92,6 +92,8 @@ import {
   hayazakiNoHaruSchema,
 } from "./HelloWorld/HayazakiNoHaruVideo";
 import { hayazakiNoHaruData } from "./HelloWorld/HayazakiNoHaruData";
+import { JinchougeVideo, jinchougeSchema } from "./HelloWorld/JinchougeVideo";
+import { jinchougeData } from "./HelloWorld/JinchougeData";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -1810,6 +1812,92 @@ export const RemotionRoot: React.FC = () => {
             { timeTag: "[02:22.04]", text: "私の春を" },
             { timeTag: "[02:24.31]", text: "また来年も 先に咲いてみせる" },
             { timeTag: "[02:30.34]", text: "これが私の 早咲きの春" },
+          ],
+        }}
+      />
+      {/* 沈丁花 - 春のリリック動画 */}
+      <Composition
+        id="Jinchouge"
+        component={JinchougeVideo}
+        durationInFrames={5190}
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={jinchougeSchema}
+        defaultProps={{
+          fontSize: 35,
+          bottomOffset: 40,
+          title: "沈丁花",
+          artist: "Suno AI",
+          videoSource: staticFile("suno_PJ/done/沈丁花.mp4"),
+          lyrics: [
+            { timeTag: "[00:00.67]", text: "段ボールに詰めた　三年分の日々" },
+            {
+              timeTag: "[00:04.14]",
+              text: "「ここまでだ」って言った声は　思ったより静かだった",
+            },
+            {
+              timeTag: "[00:07.49]",
+              text: "鍵を返す手が震えた　最後のドアを閉めて",
+            },
+            { timeTag: "[00:10.96]", text: "ポケットの中　何も入ってない" },
+            {
+              timeTag: "[00:14.40]",
+              text: "商店街のパン屋　いつの間にか開いてる",
+            },
+            {
+              timeTag: "[00:17.65]",
+              text: "名前も知らない花が　植え込みで揺れてた",
+            },
+            {
+              timeTag: "[00:21.43]",
+              text: "まだ三月なのに　陽射しがやけに眩しい",
+            },
+            { timeTag: "[00:24.78]", text: "目を細めたら　なぜか涙が出た" },
+            { timeTag: "[00:28.18]", text: "喉の奥の塊が　溶けてゆく" },
+            { timeTag: "[00:31.57]", text: "泣いていいなら　もう少しだけ" },
+            { timeTag: "[00:34.79]", text: "春よ　背中を押して" },
+            { timeTag: "[00:37.57]", text: "凍りついた僕を　溶かしてくれ" },
+            { timeTag: "[00:41.51]", text: "握りしめすぎた拳を開いたら" },
+            { timeTag: "[00:45.39]", text: "掌に　種がひとつ残ってた" },
+            { timeTag: "[00:49.23]", text: "植えてみる　枯れたっていい" },
+            { timeTag: "[00:51.68]", text: "まず土を掘る" },
+            {
+              timeTag: "[01:01.07]",
+              text: "面接帰りの電車は　思ったより空いてた",
+            },
+            { timeTag: "[01:04.71]", text: "志望動機の欄が　真っ白のまま" },
+            {
+              timeTag: "[01:07.98]",
+              text: "帰り道　公園のベンチで缶コーヒーを開けたら",
+            },
+            { timeTag: "[01:11.45]", text: "隣に座った猫が　あくびをした" },
+            { timeTag: "[01:15.00]", text: "答え合わせは　まだずっと先" },
+            { timeTag: "[01:18.42]", text: "この居心地の悪さごと　抱えて歩く" },
+            { timeTag: "[01:21.71]", text: "春に　追いつかれた" },
+            {
+              timeTag: "[01:24.85]",
+              text: "逃げてたはずなのに　うなじに陽が当たる",
+            },
+            { timeTag: "[01:29.28]", text: "靴紐を結び直した足が" },
+            { timeTag: "[01:32.40]", text: "勝手に　次の角を曲がる" },
+            { timeTag: "[01:36.19]", text: "歩いてる　不格好でも" },
+            { timeTag: "[01:38.65]", text: "前に進んでる" },
+            { timeTag: "[01:54.00]", text: "ああ　そうか　わかった" },
+            { timeTag: "[01:56.24]", text: "押してたのは　春じゃなくて" },
+            { timeTag: "[02:00.15]", text: "ずっと　この胸の奥の" },
+            { timeTag: "[02:03.09]", text: "まだ諦めきれない　馬鹿な火だ" },
+            { timeTag: "[02:09.06]", text: "春より　先に咲く" },
+            { timeTag: "[02:11.83]", text: "背中を押さなくても　歩けるから" },
+            { timeTag: "[02:16.48]", text: "枯れた冬を越えた　この根っこが" },
+            { timeTag: "[02:19.77]", text: "水を吸って　幹になってゆく" },
+            { timeTag: "[02:23.77]", text: "咲いてみる　誰のためでもない" },
+            { timeTag: "[02:26.84]", text: "自分の花" },
+            { timeTag: "[02:35.63]", text: "商店街のパン屋の前" },
+            {
+              timeTag: "[02:38.83]",
+              text: "あれは沈丁花(じんちょうげ)って言うらしい",
+            },
           ],
         }}
       />
