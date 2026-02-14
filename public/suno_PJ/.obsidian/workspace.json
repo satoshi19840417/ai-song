@@ -40,9 +40,19 @@
               "icon": "lucide-git-fork",
               "title": "グラフビュー"
             }
+          },
+          {
+            "id": "f6e58bd609b19c13",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "グラフビュー"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -201,11 +211,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "b2607d69069ca94b",
+  "active": "f6e58bd609b19c13",
   "lastOpenFiles": [
+    "Suno/01_Songs/_template_song.md",
+    "Suno/01_Songs/SNG-2026-0001_ありがとう.md",
+    "Suno/03_LyricsLibrary/_lyrics_library.md",
+    "Suno/99_Exports/_README.md",
     "Suno/Untitled.base",
     "無題のファイル.canvas",
-    "Suno/01_Songs/SNG-2026-0002_神様のイタズラ.md",
-    "Suno/01_Songs/_template_song.md"
+    "Suno/01_Songs/SNG-2026-0002_神様のイタズラ.md"
   ]
 }

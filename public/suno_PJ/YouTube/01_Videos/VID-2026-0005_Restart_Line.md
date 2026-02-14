@@ -3,8 +3,8 @@ type: youtube_video
 id: VID-2026-0005
 title: Restart Line
 status: uploaded
-publish_date: 
-youtube_url: 
+publish_date: 2026-01-02
+youtube_url: https://www.youtube.com/watch?v=t3QOxuz1t-Y
 tags: [Remotion, Suno, LyricVideo, Cheering]
 related_suno_id: SNG-2026-0005
 ---

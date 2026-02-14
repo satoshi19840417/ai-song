@@ -3,8 +3,8 @@ type: youtube_video
 id: VID-2026-0009
 title: Invisible Border
 status: uploaded
-publish_date: 
-youtube_url: 
+publish_date: 2025-12-21
+youtube_url: https://www.youtube.com/watch?v=-bmh0u6Vwkg
 tags: [Remotion, Suno, LyricVideo, Cinematic, SciFi]
 related_suno_id: SNG-2026-0009
 ---
