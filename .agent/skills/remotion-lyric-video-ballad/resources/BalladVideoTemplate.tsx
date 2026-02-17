@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 import {
     AbsoluteFill,
     useVideoConfig,
@@ -18,10 +17,12 @@ import {
     getPremountDuration,
     FONTS,
     TEXT_SHADOWS,
-} from "./animationUtils";
+} from "../../src/HelloWorld/animationUtils"; // Adjust import path as needed
 
+// ============================================
 // Schema for props
-export const yukitokenoLoveLetterSchema = z.object({
+// ============================================
+export const balladVideoSchema = z.object({
     fontSize: z.number().default(42),
     bottomOffset: z.number().default(110),
     title: z.string(),
@@ -43,25 +44,25 @@ const parseTime = (tag: string) => {
 };
 
 // ============================================
-// Color Constants — 切ないバラード
+// Color Constants — Quiet Ballad Style
 // ============================================
 const COLORS = {
     white: "#ffffff",
     whiteSubtle: "rgba(255, 255, 255, 0.92)",
     whiteDim: "rgba(255, 255, 255, 0.6)",
-    pink: "#f48fb1",           // 春・ラブレターのピンク
-    pinkSoft: "#f8bbd0",       // 柔らかいピンク
+    pink: "#f48fb1",           // Key Color (e.g. Spring, Love)
+    pinkSoft: "#f8bbd0",       // Soft Pink
     pinkGlow: "rgba(244, 143, 177, 0.35)",
 };
 
-// ピンクにする文字判定
-const PINK_KEYWORDS = ["春", "ラブレター"];
+// Keywords to highlight in pink
+const PINK_KEYWORDS = ["春", "ラブレター", "桜", "恋"]; // Add your keywords here
 
 const containsPinkKeyword = (text: string): boolean =>
     PINK_KEYWORDS.some((kw) => text.includes(kw));
 
 // ============================================
-// Component: Per-character coloring (春・ラブレター only pink)
+// Component: Colored Lyric Text (Partial Pink)
 // ============================================
 const ColoredLyricText: React.FC<{
     text: string;
@@ -72,7 +73,6 @@ const ColoredLyricText: React.FC<{
     textShadow: string;
     additionalStyle?: React.CSSProperties;
 }> = ({ text, fontSize, fontFamily, baseColor, pinkColor, textShadow, additionalStyle = {} }) => {
-    // Split text and mark pink segments
     const segments: { text: string; isPink: boolean }[] = [];
     let remaining = text;
 
@@ -128,7 +128,7 @@ const ColoredLyricText: React.FC<{
 };
 
 // ============================================
-// Component: Standard Lyric Line (おとなしめ白文字)
+// Component: Standard Lyric Line
 // ============================================
 const StandardLyricLine: React.FC<{
     text: string;
@@ -208,7 +208,7 @@ const StandardLyricLine: React.FC<{
 };
 
 // ============================================
-// Component: Emphasis Lyric Line (少しだけ強調)
+// Component: Emphasis Lyric Line
 // ============================================
 const EmphasisLyricLine: React.FC<{
     text: string;
@@ -289,7 +289,7 @@ const EmphasisLyricLine: React.FC<{
 };
 
 // ============================================
-// Component: Final Lyric Line — 私の春が 今…はじまる
+// Component: Final Lyric Line
 // ============================================
 const FinalLyricLine: React.FC<{
     text: string;
@@ -314,69 +314,47 @@ const FinalLyricLine: React.FC<{
     const hasPink = containsPinkKeyword(text);
 
     return (
-        <>
-            {/* Main final text */}
-            <div
-                style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: `translate(-50%, -50%) scale(${scale})`,
-                    textAlign: "center",
-                    opacity,
-                    whiteSpace: "nowrap",
-                }}
-            >
-                {hasPink ? (
-                    <ColoredLyricText
-                        text={text}
-                        fontSize={fontSize * 1.4}
-                        fontFamily={FONTS.kleeOne}
-                        baseColor={COLORS.white}
-                        pinkColor={COLORS.pink}
-                        textShadow={`${TEXT_SHADOWS.subtle}, 0 0 12px rgba(255,255,255,0.15)`}
-                    />
-                ) : (
-                    <span
-                        style={{
-                            fontSize: fontSize * 1.4,
-                            fontFamily: FONTS.kleeOne,
-                            fontWeight: 400,
-                            color: COLORS.white,
-                            textShadow: `${TEXT_SHADOWS.subtle}, 0 0 12px rgba(255,255,255,0.15)`,
-                            letterSpacing: "0.08em",
-                        }}
-                    >
-                        {text}
-                    </span>
-                )}
-            </div>
-
-            {/* Subtle underline */}
-            <div
-                style={{
-                    position: "absolute",
-                    top: "57%",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: spring({
-                        frame: Math.max(0, frame - 45),
-                        fps,
-                        config: SPRING_CONFIGS.smooth,
-                        from: 0,
-                        to: 200,
-                    }),
-                    height: 1,
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-                    opacity: fadeInOut(frame, duration, 60, 60),
-                }}
-            />
-        </>
+        <div
+            style={{
+                position: "absolute",
+                top: "50%",
+                left: 0,
+                width: "100%",
+                textAlign: "center",
+                transform: `translateY(-50%) scale(${scale})`,
+                opacity,
+            }}
+        >
+            {hasPink ? (
+                <ColoredLyricText
+                    text={text}
+                    fontSize={fontSize * 1.3}
+                    fontFamily={FONTS.kleeOne}
+                    baseColor={COLORS.white}
+                    pinkColor={COLORS.pink}
+                    textShadow={TEXT_SHADOWS.strongGlow}
+                    additionalStyle={{ letterSpacing: "0.1em" }}
+                />
+            ) : (
+                <span
+                    style={{
+                        fontSize: fontSize * 1.3,
+                        fontFamily: FONTS.kleeOne,
+                        fontWeight: 400,
+                        color: COLORS.white,
+                        textShadow: TEXT_SHADOWS.strongGlow,
+                        letterSpacing: "0.1em",
+                    }}
+                >
+                    {text}
+                </span>
+            )}
+        </div>
     );
 };
 
 // ============================================
-// Component: Opening Title (ふわっと表示・右寄せ)
+// Component: Opening Title (Left-Bottom)
 // ============================================
 const OpeningTitle: React.FC<{
     title: string;
@@ -386,7 +364,7 @@ const OpeningTitle: React.FC<{
     const { fps } = useVideoConfig();
     const duration = 330;
 
-    // Title: ふわっとフェードイン → 長く表示 → ふわっとフェードアウト
+    // Title: Gentle fade in
     const titleOpacity = interpolate(
         frame,
         [0, 45, duration - 60, duration],
@@ -398,7 +376,7 @@ const OpeningTitle: React.FC<{
         }
     );
 
-    // Gentle rise on entrance
+    // Title: Gentle rise
     const titleY = interpolate(
         frame,
         [0, 50],
@@ -410,7 +388,7 @@ const OpeningTitle: React.FC<{
         }
     );
 
-    // Artist: delayed fade in
+    // Artist: Delayed fade in
     const artistDelay = 60;
     const artistOpacity = interpolate(
         frame,
@@ -423,7 +401,7 @@ const OpeningTitle: React.FC<{
         }
     );
 
-    // Subtle line
+    // Line width animation
     const lineWidth = spring({
         frame: Math.max(0, frame - artistDelay - 20),
         fps,
@@ -454,11 +432,11 @@ const OpeningTitle: React.FC<{
                 alignItems: "flex-start",
                 justifyContent: "flex-end",
                 paddingLeft: 80,
-                paddingBottom: 350,
+                paddingBottom: 350, // Positioned below center
                 transform: `translateY(${floatY}px)`,
             }}
         >
-            {/* Main Title — ふわっとフェード */}
+            {/* Main Title */}
             <h1
                 style={{
                     fontFamily: FONTS.kleeOne,
@@ -481,7 +459,7 @@ const OpeningTitle: React.FC<{
                 />
             </h1>
 
-            {/* Artist Name — 筆記体 */}
+            {/* Artist Name */}
             <h2
                 style={{
                     fontFamily: "'Dancing Script', cursive",
@@ -513,15 +491,16 @@ const OpeningTitle: React.FC<{
 };
 
 // ============================================
-// Component: Ending Title Card (曲名をふわっと表示)
+// Component: Ending Title Card
 // ============================================
 const EndingTitle: React.FC<{
     title: string;
 }> = ({ title }) => {
     const frame = useCurrentFrame();
-    const duration = 135; // 4.5 seconds
+    // Show from 4.5s before end
+    const duration = 135;
 
-    // Very gentle fade in/out
+    // Gentle fade in, slow fade out
     const opacity = interpolate(
         frame,
         [0, 15, duration - 30, duration],
@@ -574,10 +553,10 @@ const EndingTitle: React.FC<{
 };
 
 // ============================================
-// Main Composition
+// Main Composition Template
 // ============================================
-export const YukitokenoLoveLetterVideo: React.FC<
-    z.infer<typeof yukitokenoLoveLetterSchema>
+export const BalladVideoTemplate: React.FC<
+    z.infer<typeof balladVideoSchema>
 > = (props) => {
     const { fps, durationInFrames } = useVideoConfig();
 
@@ -624,20 +603,14 @@ export const YukitokenoLoveLetterVideo: React.FC<
                     durationFrames = 300;
                 }
 
-                // 間奏前の歌詞は表示時間を短くする
-                const isInterludeLine = line.text === "冷えた手のひらが 今 熱くなる";
-                if (isInterludeLine) {
-                    durationFrames = Math.min(durationFrames, 150); // ~5秒
-                }
+                // Example: Shorten duration for specific lines (Interdules)
+                // const isInterludeLine = line.text === "Specific Line Text";
+                // if (isInterludeLine) {
+                //     durationFrames = Math.min(durationFrames, 150);
+                // }
 
-                // Emphasis: 感情的フレーズ
-                const isEmphasis =
-                    line.text.includes("雪解けのラブレター") ||
-                    line.text.includes("知ってほしいだけ") ||
-                    line.text.includes("ラブレター") ||
-                    line.text.includes("春が来たら") ||
-                    line.text.includes("私の春が");
-
+                // Check for emphasis keywords
+                const isEmphasis = containsPinkKeyword(line.text);
                 const isLastLine = !nextLine;
 
                 return (
@@ -655,6 +628,7 @@ export const YukitokenoLoveLetterVideo: React.FC<
                                 fontSize={props.fontSize}
                             />
                         ) : isEmphasis ? (
+                            // Use Emphasis line if contains keywords
                             <EmphasisLyricLine
                                 text={line.text}
                                 duration={durationFrames}
@@ -673,10 +647,10 @@ export const YukitokenoLoveLetterVideo: React.FC<
                 );
             })}
 
-            {/* Ending Title Card — 曲名をふわっと表示 */}
+            {/* Ending Title Card — Shows song title before end */}
             <Sequence
-                from={durationInFrames - 150}
-                durationInFrames={135}
+                from={durationInFrames - 150} // 5s before end
+                durationInFrames={135}        // 4.5s duration
                 premountFor={getPremountDuration(fps)}
             >
                 <EndingTitle title={props.title} />
