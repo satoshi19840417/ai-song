@@ -5,85 +5,72 @@ description: Generate a Remotion lyric video from files in public/suno_PJ/new
 
 # Create Lyric Video Skill
 
-This skill automates the process of creating a new lyric video component in the Remotion project using media and LRC files found in `public/suno_PJ/new`.
+`public/suno_PJ/new` の `.lrc + media(.mp4/.mp3/.wav)` から、Remotion用の歌詞動画コンポーネントを自動生成するスキル。
+
+## Quick Start (推奨)
+
+実行ディレクトリ: `my-remotion-01`
+
+```powershell
+# 1) 新規ペア検出（確認）
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/detect_new_media_pair.ps1
+
+# 2) 本実行（自動検出 + 生成 + Root登録 + build）
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/run_create_lyric_video.ps1 -SongName YukitokenoLoveLetter
+
+# 3) 完了ファイル移動（必要時）
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/run_create_lyric_video.ps1 -SongName YukitokenoLoveLetter -MoveCompleted
+```
+
+`SongName` は TypeScript 識別子に使うため **PascalCase**（英数字）で指定する。
 
 ## Workflow
 
-1.  **Scan for New Files**
-    *   Look in `public/suno_PJ/new` for pairs of `.lrc` and `.mp4` (or `.mp3`) files.
-    *   Target the first pair found.
+1. **入力ペアの検出**
+   - `detect_new_media_pair.ps1` で `public/suno_PJ/new` を走査。
+   - `.lrc` と同名（または prefix 一致）の media を選ぶ。
 
-2.  **Generate Data File**
-    *   Read the `.lrc` file content.
-    *   Create a new TypeScript file at `src/HelloWorld/[SongName]Data.ts`.
-    *   **Import format**: `import { staticFile } from "remotion";`
-    *   **Variable name**: `[camelCaseSongName]Data`
-    *   **Content**:
-        *   `title`: Use filename (without extension) or infer from content.
-        *   `artist`: Default to "Suno AI" or infer.
-        *   `videoSource`: `staticFile("suno_PJ/done/[filename].mp4")`  **IMPORTANT**: Use `done` not `new` here, as file will be moved.
-        *   `lyrics`: Array of objects `{ timeTag: string, text: string }`.
-    *   **Linting**: Add `/* eslint-disable no-irregular-whitespace */` at the top if the lyrics contain Japanese full-width spaces.
+2. **生成パイプライン実行**
+   - `run_create_lyric_video.ps1` を使用。
+   - 内部で以下を実行:
+     - `scripts/New-LyricVideo.ps1`
+     - `scripts/parse_lrc_to_data.js`
+     - `scripts/Add-Composition.ps1`
+     - （必要時）`scripts/Move-CompletedFiles.ps1`
+   - テンプレートは `templates/LyricVideoTemplate.tsx` を使う。
 
-3.  **Generate Video Component**
-    *   Create `src/HelloWorld/[SongName]Video.tsx`.
-    *   Use `ValentineVideo.tsx` as the Golden Master template.
-    *   **Import Animation Utilities**:
-        ```typescript
-        import { SPRING_CONFIGS, fadeInOut, audioFadeCurve, typewriterText, getPremountDuration, FONTS, TEXT_SHADOWS } from "./animationUtils";
-        ```
-    *   **Style Guidelines**:
-        *   **StandardLyricLine**:
-            *   Clear, readable font (`FONTS.zenKurenaido`).
-            *   Central alignment, bottom positioned.
-            *   Subtle text shadow (`TEXT_SHADOWS.subtle`).
-            *   Use `fadeInOut()` for opacity animation.
-        *   **EmphasisLyricLine** (for key phrases):
-            *   **Spring Animation**: Use `spring({ frame, fps, config: SPRING_CONFIGS.lyricEmphasis })` for bouncy scale.
-            *   **Glow Effect**: Use `TEXT_SHADOWS.warmGlow`.
-            *   Avoid harsh colors. Use soft pinks/whites.
-        *   **OpeningTitle**:
-            *   **Typewriter Effect**: Use `typewriterText()` with pause support.
-            *   **Visuals**: Floating particles, sparkling glow.
-            *   **Duration**: At least 10 seconds.
-        *   **FinalLyricLine**:
-            *   **Position**: Center screen.
-            *   **Spring Animation**: Use `SPRING_CONFIGS.heavy` for dramatic entrance.
-            *   **Glow**: Use `TEXT_SHADOWS.strongGlow`.
-            *   **Duration**: Ensure enough time for full display.
+3. **出力確認**
+   - 生成先:
+     - `src/HelloWorld/[SongName]Data.ts`
+     - `src/HelloWorld/[SongName]Video.tsx`
+   - `src/Root.tsx` に Composition が追記される。
+   - 既存同名ファイルがある場合は停止（`-Force` が必要）。
 
-4.  **Apply Sequence Best Practices**
-    *   **Premounting**: Add `premountFor` to ALL `<Sequence>` components:
-        ```tsx
-        <Sequence from={startFrame} durationInFrames={duration} premountFor={getPremountDuration(fps)}>
-        ```
-    *   This prevents lyrics from "popping in" abruptly.
+4. **プレビュー起動（必須）**
+   - `remotion-preview-launch` スキルを必ず使う。
+   - 固定ポートを前提にせず、検出された URL/PID を返す。
 
-5.  **Audio Control**
-    *   Use volume fade-in/out for smooth audio:
-        ```tsx
-        <Audio src={props.videoSource} volume={audioFadeCurve(fps, durationInFrames, 1, 2)} />
-        ```
-    *   Parameters: fade-in 1 second, fade-out 2 seconds.
+## Command Reference
 
-6.  **Register Composition**
-    *   Edit `src/Root.tsx`.
-    *   Import the new component and data file.
-    *   Add a new `<Composition />` entry.
-    *   **ID**: `[PascalCaseSongName]`
-    *   **Dimensions**: 1920x1080, 30fps.
-    *   **Duration**: Calculate based on the last lyric timestamp + **10-15 seconds buffer**.
+```powershell
+# 自動検出結果だけ確認
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/run_create_lyric_video.ps1 -DryRun
 
-7.  **Move Processed Files**
-    *   **CRITICAL**: Move source files from `public/suno_PJ/new` to `public/suno_PJ/done`.
-    *   Create the `done` directory if it doesn't exist.
+# buildを省略して生成
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/run_create_lyric_video.ps1 -SongName SampleSong -SkipBuild
 
-8.  **Launch Preview Via Dedicated Skill (CRITICAL — 必ず実行)**
-    *   **必ず** `remotion-preview-launch` スキルの SKILL.md を読み、そのワークフローに従って起動する。
-    *   PowerShellスクリプト: `.agent/skills/remotion-preview-launch/scripts/start_remotion_dev.ps1`
-    *   Return the detected Remotion URL, PID, and stop command.
-    *   Do not assume `http://localhost:3000`; always report the detected URL.
-    *   **このステップをスキップしてはならない。**
+# 明示入力で生成
+powershell -ExecutionPolicy Bypass -File .agent/skills/create_lyric_video/scripts/run_create_lyric_video.ps1 `
+  -SongName SampleSong `
+  -LrcFile "public/suno_PJ/new/sample.lrc" `
+  -MediaFile "public/suno_PJ/new/sample.mp4"
+```
+
+## Failure Notes
+
+- 日本語ファイル名から `SongName` を自動推定できない場合があるため、その場合は `-SongName` を明示する。
+- `public/suno_PJ/new` に `.lrc` だけ存在し media が無い場合はエラー終了する。
+- 失敗時は `scripts/*.backup` を確認し、必要に応じて復元する。
 
 ## Animation Best Practices Reference
 
@@ -98,4 +85,4 @@ See: `.agent/skills/remotion-best-practices/rules/` for detailed patterns.
 ## Usage
 
 When the user asks to "create a lyric video" or "process new songs", invoke this skill.
-Always verify the build or lint status after making changes.
+Always verify build status and launch preview using `remotion-preview-launch`.
