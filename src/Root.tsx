@@ -94,6 +94,8 @@ import {
 import { hayazakiNoHaruData } from "./HelloWorld/HayazakiNoHaruData";
 import { JinchougeVideo, jinchougeSchema } from "./HelloWorld/JinchougeVideo";
 import { jinchougeData } from "./HelloWorld/JinchougeData";
+import { YukitokenoLoveLetterVideo, yukitokenoLoveLetterSchema } from "./HelloWorld/YukitokenoLoveLetterVideo";
+import { yukitokenoLoveLetterData } from "./HelloWorld/YukitokenoLoveLetterData";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -1900,6 +1902,16 @@ export const RemotionRoot: React.FC = () => {
             },
           ],
         }}
+      />
+      <Composition
+        id="YukitokenoLoveLetter"
+        component={YukitokenoLoveLetterVideo}
+        durationInFrames={6300}
+        fps={30}
+        width={1920}
+        height={1080}
+        schema={yukitokenoLoveLetterSchema}
+        defaultProps={yukitokenoLoveLetterData}
       />
     </>
   );

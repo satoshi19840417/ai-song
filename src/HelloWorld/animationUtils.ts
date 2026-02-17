@@ -222,6 +222,8 @@ export const TEXT_SHADOWS = {
     warmGlow: "0 0 12px rgba(255, 182, 193, 0.6)",
     /** Strong glow for final lines */
     strongGlow: "0 0 20px rgba(255, 102, 153, 0.8)",
+    /** Ink bleed effect for love letter (インクの滲み) */
+    inkBleed: "1px 1px 3px rgba(62, 39, 35, 0.4), 0 0 6px rgba(78, 52, 46, 0.15)",
     /** Chocolate brown shadow */
     chocolate: "2px 2px 4px rgba(101, 67, 33, 0.8)",
 };
@@ -236,4 +238,12 @@ export const FONTS = {
     yujiSyuku: "'Yuji Syuku', serif",
     /** Modern sans-serif */
     notoSansJP: "'Noto Sans JP', sans-serif",
+    /** Handwritten style - gentle and feminine (手書き風・女性的) */
+    yomogi: "'Yomogi', cursive",
+    /** Handwritten style - warm and letter-like (手書き風・ラブレター感) */
+    kleeOne: "'Klee One', cursive",
+    /** Delicate mincho - elegant (繊細な明朝体) */
+    hinaMincho: "'Hina Mincho', serif",
+    /** Soft rounded handwriting (柔らかい丸文字) */
+    kiwiMaru: "'Kiwi Maru', serif",
 };
