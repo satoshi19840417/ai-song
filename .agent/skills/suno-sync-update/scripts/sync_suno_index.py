@@ -3,16 +3,22 @@ sync_suno_index.py
 fetched.json と既存Markdownファイルを比較して差分を反映する。
 
 使い方:
-  python sync_suno_index.py [--fetched fetched.json] [--songs-dir ../../public/suno_PJ/Suno/01_Songs] [--index ../../public/suno_PJ/Suno/_index.md]
+  python sync_suno_index.py [--fetched fetched.json] [--songs-dir ../../public/suno_PJ/Suno/01_Songs] [--index ../../public/suno_PJ/Suno/_index.md] [--refresh-trends/--no-refresh-trends]
 """
 
 import argparse
+import hashlib
 import json
-import os
 import re
+import subprocess
+import sys
 import unicodedata
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+SNAPSHOT_SCHEMA_VERSION = "1"
+SNAPSHOT_TTL_FALLBACK_DAYS = 3
+UTF8_BOM = "\ufeff"
 
 
 # ---------------------------------------------------------------------------
@@ -29,6 +35,47 @@ def normalize_title(title: str) -> str:
     # 記号・括弧・スペースを除去
     t = re.sub(r"[\s\-_　・【】「」『』（）()【】〔〕\[\]〈〉《》]+", "", t)
     return t
+
+
+def strip_bom(text: str) -> str:
+    return text[1:] if text.startswith(UTF8_BOM) else text
+
+
+def normalize_for_hash(text: str) -> str:
+    text = strip_bom(text).replace("\r\n", "\n").replace("\r", "\n")
+    lines = [line.rstrip() for line in text.split("\n")]
+    normalized: list[str] = []
+    prev_blank = False
+    for line in lines:
+        is_blank = line == ""
+        if is_blank and prev_blank:
+            continue
+        normalized.append(line)
+        prev_blank = is_blank
+    return "\n".join(normalized).strip()
+
+
+def extract_section_body(content: str, heading: str) -> str:
+    pattern = rf"^##\s*{re.escape(heading)}\s*\n(.*?)(?=^##\s|\Z)"
+    m = re.search(pattern, content, re.DOTALL | re.MULTILINE)
+    return m.group(1).strip() if m else ""
+
+
+def compute_released_index_hash(index_path: Path) -> str:
+    raw = strip_bom(index_path.read_text(encoding="utf-8"))
+    released_body = extract_section_body(raw, "公開済 (released)")
+    tag_body = extract_section_body(raw, "タグ別索引")
+    if not released_body or not tag_body:
+        raise RuntimeError("_index.md の必要セクション抽出に失敗")
+
+    table_lines = [line.rstrip() for line in released_body.splitlines() if line.lstrip().startswith("|")]
+    released_table = normalize_for_hash("\n".join(table_lines))
+    tag_index = normalize_for_hash(tag_body)
+    if not released_table:
+        raise RuntimeError("公開済テーブルが空のため hash 算出不可")
+
+    canonical = f"{released_table}\n---\n{tag_index}\n"
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def extract_song_id_from_url(url: str) -> str:
@@ -57,7 +104,8 @@ def load_existing_songs(songs_dir: Path) -> list[dict]:
 def parse_frontmatter(content: str) -> dict:
     """YAML frontmatter を簡易パース（yaml不要）。"""
     fm = {}
-    m = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    text = strip_bom(content)
+    m = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
     if not m:
         return fm
     for line in m.group(1).splitlines():
@@ -72,6 +120,96 @@ def parse_frontmatter(content: str) -> dict:
             else:
                 fm[key] = val
     return fm
+
+
+def get_latest_released_song_id(songs: list[dict]) -> str:
+    released_ids = [s.get("id", "") for s in songs if s.get("status") == "released" and s.get("id")]
+    return max(released_ids) if released_ids else ""
+
+
+def parse_snapshot_frontmatter(snapshot_path: Path) -> dict:
+    content = snapshot_path.read_text(encoding="utf-8")
+    return parse_frontmatter(content)
+
+
+def parse_utc_timestamp(value: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def validate_snapshot(snapshot_path: Path, index_path: Path, songs_dir: Path) -> tuple[bool, str]:
+    if not snapshot_path.exists():
+        return False, "snapshot不存在"
+
+    try:
+        fm = parse_snapshot_frontmatter(snapshot_path)
+    except Exception as exc:  # noqa: BLE001
+        return False, f"snapshot読込失敗: {exc}"
+
+    if not fm:
+        return False, "snapshotヘッダー欠落"
+    if str(fm.get("schema_version", "")) != SNAPSHOT_SCHEMA_VERSION:
+        return False, "schema_version不一致"
+
+    generated_at_utc = str(fm.get("generated_at_utc", "")).strip()
+    ts = parse_utc_timestamp(generated_at_utc)
+    if ts is None:
+        return False, "generated_at_utc不正"
+
+    ttl_days_raw = fm.get("ttl_days", SNAPSHOT_TTL_FALLBACK_DAYS)
+    try:
+        ttl_days = int(ttl_days_raw)
+    except (TypeError, ValueError):
+        return False, "ttl_days不正"
+    if ttl_days <= 0:
+        return False, "ttl_days不正"
+
+    if datetime.now(timezone.utc) > ts + timedelta(days=ttl_days):
+        return False, "TTL超過"
+
+    all_songs = load_existing_songs(songs_dir)
+    current_latest_released = get_latest_released_song_id(all_songs)
+    if str(fm.get("latest_released_song_id", "")) != current_latest_released:
+        return False, "latest_released_song_id不一致"
+
+    try:
+        expected_hash = compute_released_index_hash(index_path)
+    except Exception as exc:  # noqa: BLE001
+        return False, f"index hash算出失敗: {exc}"
+    if str(fm.get("released_index_hash", "")) != expected_hash:
+        return False, "released_index_hash不一致"
+
+    return True, "valid"
+
+
+def run_trend_refresh(
+    trend_script: Path,
+    songs_dir: Path,
+    index_path: Path,
+    trend_output: Path,
+    lock_timeout_sec: int,
+) -> tuple[bool, str]:
+    cmd = [
+        sys.executable,
+        str(trend_script),
+        "--songs-dir",
+        str(songs_dir),
+        "--index",
+        str(index_path),
+        "--out",
+        str(trend_output),
+        "--scope",
+        "released",
+        "--recent-window",
+        "12",
+        "--lock-timeout-sec",
+        str(lock_timeout_sec),
+    ]
+    completed = subprocess.run(cmd, capture_output=True, text=True)
+    output = (completed.stdout or "") + (completed.stderr or "")
+    return completed.returncode == 0, output.strip()
 
 
 def next_song_id(songs: list[dict], year: int) -> str:
@@ -332,14 +470,47 @@ def main():
     )
     parser.add_argument("--handle", default="hypnotizingtonalities0343", help="Sunoハンドル名")
     parser.add_argument("--dry-run", action="store_true", help="ファイル書き込みをせず差分だけ表示")
+    refresh_group = parser.add_mutually_exclusive_group()
+    refresh_group.add_argument(
+        "--refresh-trends",
+        dest="refresh_trends",
+        action="store_true",
+        help="同期後に歌詞傾向snapshot更新を試行（既定値）",
+    )
+    refresh_group.add_argument(
+        "--no-refresh-trends",
+        dest="refresh_trends",
+        action="store_false",
+        help="歌詞傾向snapshot更新を無効化",
+    )
+    parser.set_defaults(refresh_trends=True)
+    parser.add_argument(
+        "--trend-script",
+        default=str(Path(__file__).parent.parent.parent / "refresh-lyric-trends/scripts/refresh_lyric_trends.py"),
+        help="傾向snapshot更新スクリプト",
+    )
+    parser.add_argument(
+        "--trend-output",
+        default=str(Path(__file__).parent.parent.parent.parent.parent / "public/suno_PJ/Suno/_trend_snapshot.md"),
+        help="傾向snapshot出力先",
+    )
+    parser.add_argument(
+        "--trend-lock-timeout-sec",
+        type=int,
+        default=10,
+        help="傾向snapshot更新時のlock待機秒",
+    )
     args = parser.parse_args()
 
     songs_dir = Path(args.songs_dir)
     index_path = Path(args.index)
+    trend_script_path = Path(args.trend_script)
+    trend_output_path = Path(args.trend_output)
+    trend_lock_timeout_sec = max(1, int(args.trend_lock_timeout_sec))
     today = date.today().isoformat()
 
     # 取得済みJSONロード
-    with open(args.fetched, encoding="utf-8") as f:
+    with open(args.fetched, encoding="utf-8-sig") as f:
         fetched_clips: list[dict] = json.load(f)
 
     print(f"[INFO] 取得クリップ数: {len(fetched_clips)}")
@@ -421,11 +592,56 @@ def main():
         )
         print(f"[INFO] {index_path} を更新しました")
 
+    trend_status = "スキップ"
+    trend_detail = ""
+    if args.dry_run:
+        trend_status = "スキップ(dry-run)"
+        trend_detail = "dry-runではrefreshを実行しない"
+    elif not args.refresh_trends:
+        trend_status = "スキップ"
+        trend_detail = "--no-refresh-trends 指定"
+    else:
+        snapshot_valid, snapshot_reason = validate_snapshot(trend_output_path, index_path, songs_dir)
+        released_affected = (len(new_songs) + len(updated_songs)) > 0
+        should_refresh = released_affected or (not snapshot_valid)
+
+        if should_refresh:
+            print(
+                "[INFO] 傾向サマリ更新を実行します "
+                f"(差分あり={released_affected}, snapshot状態={snapshot_reason})"
+            )
+            if not trend_script_path.exists():
+                trend_status = "失敗"
+                trend_detail = f"trend-script 不存在: {trend_script_path}"
+            else:
+                ok, output = run_trend_refresh(
+                    trend_script=trend_script_path,
+                    songs_dir=songs_dir,
+                    index_path=index_path,
+                    trend_output=trend_output_path,
+                    lock_timeout_sec=trend_lock_timeout_sec,
+                )
+                trend_status = "成功" if ok else "失敗"
+                trend_detail = re.sub(r"\s*\n\s*", " | ", output).strip() if output else "(出力なし)"
+                if ok:
+                    print("[INFO] 傾向サマリ更新に成功")
+                else:
+                    print(
+                        "[WARN] 傾向サマリ更新に失敗。同期本体は継続し、"
+                        "消費側はsnapshot無効時にfallbackします。"
+                    )
+        else:
+            trend_status = "スキップ"
+            trend_detail = f"snapshot有効: {snapshot_reason}"
+
     # サマリー
     print("\n=== 同期サマリー ===")
     print(f"  新規追加: {len(new_songs)} 件")
     print(f"  更新:     {len(updated_songs)} 件")
     print(f"  未確定:   {len(unresolved)} 件")
+    print(f"  傾向サマリ更新: {trend_status}")
+    if trend_detail:
+        print(f"    詳細: {trend_detail}")
     if unresolved:
         print("\n--- 未確定リスト ---")
         for u in unresolved:

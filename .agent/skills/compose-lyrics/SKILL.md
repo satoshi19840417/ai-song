@@ -21,7 +21,16 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 
 参照: `references/song-structure-patterns.md` で構成パターンを選択。
 
-### 2. 歌詞作成
+### 2. 傾向snapshot参照
+
+作詞前に以下を確認する:
+
+- 優先: `public/suno_PJ/Suno/_trend_snapshot.md`
+- 無効時（不存在/破損/期限切れ/世代不一致）: `public/suno_PJ/Suno/01_Songs/*.md` を直接参照
+
+`compose-lyrics` は `draft` 追加が主目的のため、snapshot の再生成自体はここで強制しない。
+
+### 3. 歌詞作成
 
 ヒアリング内容に基づき日本語歌詞を作成する：
 
@@ -30,13 +39,13 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 - 各セクションの行数目安: Verse=4〜6行、Chorus=4〜6行、Bridge=2〜4行
 - 参照: `references/suno-tags-guide.md` でタグ使用法を確認
 
-### 3. スタイル文作成
+### 4. スタイル文作成
 
 `public/suno_PJ/Suno/02_StyleLibrary/_style_library.md` を参照してSuno用スタイル文を英語で作成する（カンマ区切り）。
 
 例: `Emotional J-Pop Ballad, Piano, Strings, Female Vocal, Melancholic`
 
-### 4. Sunoタグ付き歌詞フォーマット出力
+### 5. Sunoタグ付き歌詞フォーマット出力
 
 セクションタグ付きで歌詞を整形する。参照: `references/suno-tags-guide.md`
 
@@ -66,7 +75,7 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 （歌詞）
 ```
 
-### 5. LRCファイル生成
+### 6. LRCファイル生成
 
 仮タイムコード付きの `.lrc` ファイル内容を生成する。参照: `references/lrc-format-spec.md`
 
@@ -75,11 +84,11 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 - ファイル名: `[曲タイトル].lrc`
 - 保存先: `public/suno_PJ/new/[曲タイトル].lrc`
 
-### 6. 次のIDを確定
+### 7. 次のIDを確定
 
 `public/suno_PJ/Suno/_index.md` を読み込み、最後の SNG-2026-NNNN の番号を確認して次のIDを決定する。
 
-### 7. 楽曲MDファイル保存
+### 8. 楽曲MDファイル保存
 
 `public/suno_PJ/Suno/01_Songs/_template_song.md` のフォーマットで以下のファイルを作成する：
 - パス: `public/suno_PJ/Suno/01_Songs/SNG-YYYY-NNNN_[タイトル].md`
@@ -87,7 +96,7 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 - `## 4) 制作メモ` に compose-lyrics スキルで作成した旨とLRCパスを記載
 - `## 5) 変更履歴` に作成日と初稿作成を記載
 
-### 8. インデックス更新
+### 9. インデックス更新
 
 `public/suno_PJ/Suno/_index.md` の「作業中 (draft)」テーブルに新曲エントリを追加する：
 
@@ -95,7 +104,7 @@ description: 日本語歌詞を作成し、Suno AIタグ付き歌詞・LRCファ
 | SNG-YYYY-NNNN | [タイトル](01_Songs/SNG-YYYY-NNNN_タイトル.md) | YYYY-MM-DD |
 ```
 
-### 9. 次のスキルへの引き渡し
+### 10. 次のスキルへの引き渡し
 
 保存が完了したら、ユーザーに以下を案内する：
 

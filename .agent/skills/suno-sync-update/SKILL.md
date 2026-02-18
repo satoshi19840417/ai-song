@@ -46,6 +46,10 @@ python sync_suno_index.py --fetched fetched.json --handle hypnotizingtonalities0
 
 オプション:
 - `--dry-run`: ファイル書き込みなしで差分だけ確認
+- `--refresh-trends` / `--no-refresh-trends`: 傾向snapshot更新の有効/無効
+- `--trend-script <path>`: refreshスクリプトのパス
+- `--trend-output <path>`: `_trend_snapshot.md` 出力先
+- `--trend-lock-timeout-sec <sec>`: lock待機秒
 
 ### 3. 結果確認
 
@@ -56,6 +60,7 @@ python sync_suno_index.py --fetched fetched.json --handle hypnotizingtonalities0
   新規追加: N 件
   更新:     N 件
   未確定:   N 件
+  傾向サマリ更新: 成功/失敗/スキップ
 ```
 
 未確定があれば `_index.md` の同期メモを確認して手動対応。
@@ -82,4 +87,5 @@ python sync_suno_index.py --fetched fetched.json --handle hypnotizingtonalities0
 - スクリプトは `_content` (歌詞・スタイル・制作メモ) を変更しない
 - 更新対象は frontmatter の `suno_song_url` と `tags`、および `_index.md` の索引ブロック
 - 同日2回実行しても安全（冪等）
+- 傾向snapshot更新に失敗しても同期本体は失敗扱いにしない（消費側はsnapshot無効時にfallback）
 - API仕様変更でエラーが出た場合は `fetched.json` の内容と `_index.md` 同期メモを確認

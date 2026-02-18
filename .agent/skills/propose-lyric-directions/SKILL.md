@@ -20,10 +20,17 @@ description: 歌詞制作の前段で方向性を確認し、過去曲の傾向�
 
 ### 2. 過去曲の傾向を抽出する
 
-以下を優先して読み、傾向スナップショットを作る。
+以下の優先順で傾向を取得する。
+
+1. `my-remotion-01/public/suno_PJ/Suno/_trend_snapshot.md` を検証して利用
+2. snapshot が無効（不存在/破損/TTL超過/世代不一致）なら `01_Songs` 直接走査へフォールバック
+
+フォールバック時の入力:
 
 - `my-remotion-01/public/suno_PJ/Suno/_index.md`
 - `my-remotion-01/public/suno_PJ/Suno/01_Songs/*.md`
+
+返答には必ず `参照元: snapshot` または `参照元: fallback` を明示する。
 
 分析軸:
 
