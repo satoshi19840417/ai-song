@@ -45,10 +45,17 @@
             "id": "f6e58bd609b19c13",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "グラフビュー"
+              "type": "canvas",
+              "state": {
+                "file": "無題のファイル 1.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "無題のファイル 1"
             }
           }
         ],
@@ -213,6 +220,7 @@
   },
   "active": "f6e58bd609b19c13",
   "lastOpenFiles": [
+    "無題のファイル 1.canvas",
     "Suno/01_Songs/_template_song.md",
     "Suno/01_Songs/SNG-2026-0001_ありがとう.md",
     "Suno/03_LyricsLibrary/_lyrics_library.md",

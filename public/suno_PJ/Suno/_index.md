@@ -1,6 +1,6 @@
 # Suno楽曲一覧
 
-最終更新: 2026-02-14
+最終更新: 2026-02-19
 
 ---
 
@@ -26,8 +26,10 @@
 | SNG-2026-0016 | [未完成の地図](01_Songs/SNG-2026-0016_未完成の地図.md) | J-POP, 自己探求 | https://suno.com/song/26d35a87-3f0d-4ecb-ac34-418e603c1f58 |
 | SNG-2026-0017 | [仮面舞踏会](01_Songs/SNG-2026-0017_仮面舞踏会.md) | electro rock, 虚像 | https://suno.com/song/0f41495f-d07a-4b54-9859-2e6b923d7dde |
 | SNG-2026-0018 | [僕らはまた](01_Songs/SNG-2026-0018_僕らはまた.md) | J-POP, 再会 | https://suno.com/song/da48138b-5d13-447f-a544-ea64668dbb5b |
+| SNG-2026-0019 | [早咲きの春](01_Songs/SNG-2026-0019_早咲きの春.md) | バラード, 梅, タイミング | https://suno.com/song/b45563f2-e77f-4b19-844a-2568cc30939c |
 | SNG-2026-0021 | [生きろ](01_Songs/SNG-2026-0021_生きろ.md) | cinematic pop, ballad | https://suno.com/song/e7576a2c-c420-4020-a56d-9d82e39e5bef |
 | SNG-2026-0022 | [今さらのHappy Valentine](01_Songs/SNG-2026-0022_今さらのHappy_Valentine.md) | J-pop, ballad | https://suno.com/song/d27f3a33-14ac-4e6e-866b-d1611212b5d6 |
+| SNG-2026-0023 | [沈丁花](01_Songs/SNG-2026-0023_沈丁花.md) | J-pop, avant-garde | https://suno.com/song/ccc59444-5b66-4f87-81b9-dde6b9eecfa7 |
 
 ---
 
@@ -35,8 +37,20 @@
 
 | ID | タイトル | 更新日 |
 |----|---------|-------|
-| SNG-2026-0019 | [早咲きの春](01_Songs/SNG-2026-0019_早咲きの春.md) | 2026-02-08 |
 | SNG-2026-0020 | [雪解けのラブレター](01_Songs/SNG-2026-0020_雪解けのラブレター.md) | 2026-02-14 |
+
+---
+
+## Suno同期メモ (2026-02-19)
+
+- 参照元: https://suno.com/@hypnotizingtonalities0343
+- 今回追加: 1 件（`SNG-2026-0023` 沈丁花）
+- 今回更新: 1 件（`SNG-2026-0019` 早咲きの春: URL補完・status→released）
+
+### 最新追加クリップ（反映済み）
+
+- `沈丁花`: https://suno.com/song/ccc59444-5b66-4f87-81b9-dde6b9eecfa7
+- `早咲きの春`: https://suno.com/song/b45563f2-e77f-4b19-844a-2568cc30939c
 
 ---
 

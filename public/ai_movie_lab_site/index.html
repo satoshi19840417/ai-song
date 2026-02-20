@@ -1006,6 +1006,64 @@
             height: 100%;
         }
 
+        .on-air-note {
+            color: #666;
+            font-size: 0.78rem;
+            margin-top: 0.8rem;
+            letter-spacing: 0.03em;
+        }
+
+        .video-label {
+            font-size: 0.8rem;
+            color: #888;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 1.5rem;
+        }
+
+        .video-error-card {
+            max-width: 900px;
+            margin: 3rem auto;
+            border: 1px solid #333;
+            background: #0b0b0b;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .video-error-inner {
+            max-width: 520px;
+        }
+
+        .video-error-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .video-error-body {
+            color: #777;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .video-error-link {
+            display: inline-block;
+            margin-top: 1.2rem;
+            color: #fff;
+            border-bottom: 1px solid #666;
+            text-decoration: none;
+            letter-spacing: 0.05em;
+        }
+
+        .video-error-link:hover {
+            color: #ccc;
+            border-color: #ccc;
+        }
+
         /* Smooth Scroll */
         html {
             scroll-behavior: smooth;
@@ -1323,6 +1381,7 @@
 
         <section class="sec" id="on-air" style="text-align: center;">
             <h2 class="sec-title">ON AIR</h2>
+            <p class="on-air-note">※ここでは120秒以上をフル動画として扱います。</p>
             <div id="latest-video-container">
                 <p style="color: #666; margin-top: 2rem;">Loading latest video...</p>
             </div>
@@ -1686,89 +1745,195 @@
             // Fetch Latest YouTube Video using YouTube Data API v3
             const API_KEY = 'AIzaSyAOkY74YSaWIXlX1wKeL1EbGus1FtdTKHk';
             const CHANNEL_ID = 'UCW96_b-PA11fp-wYC4laNtg';
-            const FULL_VIDEO_THRESHOLD = 180; // 3分（Shorts最大長）
-            const TIMEOUT_MS = 5000;
+            const LONG_FORM_MIN_SECONDS = 120;
+            const LOOKBACK_MAX_RESULTS = 30;
+            const TIMEOUT_MS = 8000;
 
-            // フォールバック動画（本関数はnullを返し、呼び出し側でFALLBACKを使用）
-            const FALLBACK = { id: 'vzERE2bGPmQ', title: 'Akaneが歌う「仮面舞踏会」: 偽りの笑顔を脱ぎ捨て、自分を取り戻すAIの世界' };
-
-            // ISO 8601 duration (PT3M30S) を秒数に変換
-            function parseDuration(iso) {
-                const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-                if (!match) return 0;
-                return (parseInt(match[1] || 0) * 3600) + (parseInt(match[2] || 0) * 60) + parseInt(match[3] || 0);
+            function escapeHtml(value = '') {
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
             }
 
-            // 動画を埋め込み表示
-            function displayVideo(videoId, title) {
+            function parseDurationToSeconds(iso) {
+                if (!iso || typeof iso !== 'string') return 0;
+                const match = iso.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+                if (!match) return 0;
+                const hours = parseInt(match[1] || 0, 10);
+                const minutes = parseInt(match[2] || 0, 10);
+                const seconds = parseInt(match[3] || 0, 10);
+                if (Number.isNaN(hours) || Number.isNaN(minutes) || Number.isNaN(seconds)) return 0;
+                return (hours * 3600) + (minutes * 60) + seconds;
+            }
+
+            function isPrivateOrDeletedTitle(title) {
+                return title === 'Private video' || title === 'Deleted video';
+            }
+
+            function isDisplayableVideo(video) {
+                if (!video || !video.snippet || !video.status) return false;
+                if (isPrivateOrDeletedTitle(video.snippet.title || '')) return false;
+                if (video.status.privacyStatus !== 'public') return false;
+                if (video.status.uploadStatus !== 'processed') return false;
+                if (video.status.embeddable !== true) return false;
+                return true;
+            }
+
+            function selectVideoForHomepage(videos) {
+                if (!Array.isArray(videos) || videos.length === 0) {
+                    return { mode: 'error', reason: 'no_displayable_video' };
+                }
+
+                const latestLong = videos.find((video) => {
+                    const duration = parseDurationToSeconds(video.contentDetails?.duration);
+                    return duration >= LONG_FORM_MIN_SECONDS;
+                });
+
+                if (latestLong) {
+                    return { mode: 'long_form', video: latestLong, label: '最新フル動画' };
+                }
+
+                return { mode: 'latest_upload', video: videos[0], label: '最新投稿（フル動画未検出）' };
+            }
+
+            function renderVideo(video, label) {
                 const container = document.getElementById('latest-video-container');
+                const videoId = video?.id;
+                if (!videoId) {
+                    renderErrorCard('no_displayable_video');
+                    return;
+                }
+
+                const title = escapeHtml(video?.snippet?.title || 'Untitled');
+                const safeLabel = escapeHtml(label || '最新動画');
                 const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0`;
                 container.innerHTML = `
                     <div class="video-wrapper">
                         <iframe src="${embedUrl}" title="${title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
-                    <p class="g-title" style="margin-top:1.5rem;">${title}</p>
+                    <p class="video-label">${safeLabel}</p>
+                    <p class="g-title" style="margin-top:0.8rem;">${title}</p>
                 `;
             }
 
-            async function fetchLatestFullVideo() {
+            function renderErrorCard(reasonCode) {
+                const container = document.getElementById('latest-video-container');
+                console.error('[youtube_fetch] reason=', reasonCode);
+                container.innerHTML = `
+                    <div class="video-error-card">
+                        <div class="video-error-inner">
+                            <p class="video-error-title">LATEST VIDEO UNAVAILABLE</p>
+                            <p class="video-error-body">
+                                現在YouTubeの最新動画を取得できません。<br>
+                                チャンネルページで最新作をご確認ください。
+                            </p>
+                            <a href="https://www.youtube.com/@AImovieLab2025" target="_blank" rel="noopener noreferrer" class="video-error-link">OPEN YOUTUBE CHANNEL →</a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function createStageError(stage, message, status) {
+                const error = new Error(message);
+                error.stage = stage;
+                if (typeof status === 'number') {
+                    error.status = status;
+                }
+                return error;
+            }
+
+            async function fetchJson(url, signal, stage) {
+                const response = await fetch(url, { signal });
+                if (!response.ok) {
+                    throw createStageError(stage, `HTTP ${response.status}`, response.status);
+                }
+                return response.json();
+            }
+
+            async function fetchLatestVideoForHomepage() {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
                 try {
-                    // 1. チャンネルのuploads playlistIdを取得
-                    const channelRes = await fetch(
-                        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`,
-                        { signal: controller.signal }
+                    const channelParams = new URLSearchParams({
+                        part: 'contentDetails',
+                        id: CHANNEL_ID,
+                        fields: 'items/contentDetails/relatedPlaylists/uploads',
+                        key: API_KEY
+                    });
+
+                    const channelData = await fetchJson(
+                        `https://www.googleapis.com/youtube/v3/channels?${channelParams.toString()}`,
+                        controller.signal,
+                        'channel_api_failed'
                     );
-                    if (!channelRes.ok) throw new Error(`Channel API: ${channelRes.status}`);
-                    const channelData = await channelRes.json();
-                    if (!channelData.items?.length) throw new Error('Channel not found');
-                    const uploadsId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+                    const uploadsId = channelData?.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+                    if (!uploadsId) {
+                        throw createStageError('channel_api_failed', 'uploads playlist not found');
+                    }
 
-                    // 2. 最新動画IDを取得（最大10件、投稿順を保持）
-                    const playlistRes = await fetch(
-                        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsId}&maxResults=10&key=${API_KEY}`,
-                        { signal: controller.signal }
+                    const playlistParams = new URLSearchParams({
+                        part: 'contentDetails,snippet',
+                        playlistId: uploadsId,
+                        maxResults: String(LOOKBACK_MAX_RESULTS),
+                        fields: 'items/contentDetails/videoId,items/snippet/title,nextPageToken',
+                        key: API_KEY
+                    });
+
+                    const playlistData = await fetchJson(
+                        `https://www.googleapis.com/youtube/v3/playlistItems?${playlistParams.toString()}`,
+                        controller.signal,
+                        'playlist_api_failed'
                     );
-                    if (!playlistRes.ok) throw new Error(`Playlist API: ${playlistRes.status}`);
-                    const playlistData = await playlistRes.json();
-                    if (!playlistData.items?.length) throw new Error('No videos found');
-                    // 投稿順序を保持するためIDリストの順番を記録
-                    const orderedIds = playlistData.items.map(i => i.contentDetails.videoId);
 
-                    // 3. duration取得
-                    const videosRes = await fetch(
-                        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${orderedIds.join(',')}&key=${API_KEY}`,
-                        { signal: controller.signal }
+                    const orderedIds = (playlistData?.items || [])
+                        .filter((item) => !isPrivateOrDeletedTitle(item?.snippet?.title || ''))
+                        .map((item) => item?.contentDetails?.videoId)
+                        .filter(Boolean);
+
+                    if (orderedIds.length === 0) {
+                        return { mode: 'error', reason: 'no_displayable_video' };
+                    }
+
+                    const videosParams = new URLSearchParams({
+                        part: 'snippet,contentDetails,status',
+                        id: orderedIds.join(','),
+                        fields: 'items/id,items/snippet/title,items/snippet/description,items/contentDetails/duration,items/status/privacyStatus,items/status/uploadStatus,items/status/embeddable',
+                        key: API_KEY
+                    });
+
+                    const videosData = await fetchJson(
+                        `https://www.googleapis.com/youtube/v3/videos?${videosParams.toString()}`,
+                        controller.signal,
+                        'videos_api_failed'
                     );
-                    if (!videosRes.ok) throw new Error(`Videos API: ${videosRes.status}`);
-                    const videosData = await videosRes.json();
-                    if (!videosData.items?.length) throw new Error('Video details not found');
 
-                    // videos.listは順序保証なし → 元の投稿順で再整列
-                    const videoMap = new Map(videosData.items.map(v => [v.id, v]));
-                    const sortedVideos = orderedIds.map(id => videoMap.get(id)).filter(Boolean);
-
-                    // 最新のフル動画（180秒超）を返す。該当なしはnull
-                    return sortedVideos.find(v => parseDuration(v.contentDetails.duration) > FULL_VIDEO_THRESHOLD) ?? null;
+                    const videoMap = new Map((videosData?.items || []).map((video) => [video.id, video]));
+                    const sortedVideos = orderedIds.map((id) => videoMap.get(id)).filter(Boolean);
+                    const displayableVideos = sortedVideos.filter(isDisplayableVideo);
+                    return selectVideoForHomepage(displayableVideos);
 
                 } catch (err) {
-                    console.error('API Error:', err.message);
-                    return null; // フォールバックへ
+                    const reason = err?.name === 'AbortError' ? 'timeout' : (err?.stage || 'videos_api_failed');
+                    const statusText = typeof err?.status === 'number' ? ` status=${err.status}` : '';
+                    console.error(`[youtube_fetch] ${reason}${statusText}`, err?.message || err);
+                    return { mode: 'error', reason };
                 } finally {
                     clearTimeout(timeoutId);
                 }
             }
 
             // 実行
-            fetchLatestFullVideo().then(video => {
-                if (video) {
-                    displayVideo(video.id, video.snippet.title);
-                } else {
-                    // フォールバック動画を表示
-                    displayVideo(FALLBACK.id, FALLBACK.title);
+            fetchLatestVideoForHomepage().then((result) => {
+                if (result.mode === 'error') {
+                    renderErrorCard(result.reason);
+                    return;
                 }
+
+                renderVideo(result.video, result.label);
             });
         });
     </script>
