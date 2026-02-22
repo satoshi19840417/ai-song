@@ -64,6 +64,19 @@ export const fadeInOut = (
     fadeInDuration = 15,
     fadeOutDuration = 15
 ): number => {
+    // Guard: duration が fade の合計以下の場合、厳密単調増加を保証するよう縮小
+    if (duration <= 2) {
+        // 極端に短い場合はフェードインのみ
+        return interpolate(frame, [0, Math.max(1, duration)], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+        });
+    }
+    if (fadeInDuration + fadeOutDuration >= duration) {
+        const available = duration - 1; // 中間に最低1フレームの隙間を確保
+        fadeInDuration = Math.max(1, Math.floor(available / 2));
+        fadeOutDuration = Math.max(1, available - fadeInDuration);
+    }
     return interpolate(
         frame,
         [0, fadeInDuration, duration - fadeOutDuration, duration],
